@@ -1,0 +1,26 @@
+ARG ALPINE_BASE
+#hadolint ignore=DL3006
+FROM $ALPINE_BASE
+
+# hadolint ignore=DL3018
+RUN set -eux ; \
+    apk update -q --no-progress ; \
+    apk --no-cache --no-progress add \
+        iptables \
+        su-exec \
+        sudo \
+    ; \
+    rm -rf /var/lib/apk/lists/*; \
+    rm /var/cache/apk/*
+
+COPY client_linux_amd64 /usr/local/bin/client
+
+ARG USERNAME=alpine
+RUN set -eux ; \
+    adduser -D -G users -s /bin/bash "${USERNAME}"; \
+    for g in adm wheel; do addgroup "${USERNAME}" "$g"; done; \
+    echo "${USERNAME}:${USERNAME}" | chpasswd; \
+    touch "/home/${USERNAME}/.bashrc"; \
+    echo "${USERNAME}    ALL=(ALL)    NOPASSWD: ALL" | tee "/etc/sudoers.d/${USERNAME}"
+
+USER alpine
