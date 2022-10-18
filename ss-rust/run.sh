@@ -99,10 +99,7 @@ if [[ ${1} == clean ]]; then
             bash "${_dir}clean.sh"
         fi
     done < <(ls -1d ${ROOT_DIR}/*/)
-    if [[ ${2} == server ]]; then
-        _delete_ufw_port "${SHADOWSOCKS[KCPTUN_PORT]}" "${SHADOWSOCKS[SHADOWSOCKS_PORT]}"
-    fi
-    [[ -x "${ROOT_DIR}/${2}/clean.sh" ]] && source "${ROOT_DIR}/${2}/clean.sh"
+    _delete_ufw_port "${SHADOWSOCKS[KCPTUN_PORT]}" "${SHADOWSOCKS[SHADOWSOCKS_PORT]}"
 elif [[ ${1} == restart ]]; then
     docker-compose -p "${PROJECT}" -f "${ROOT_DIR}/${2}/docker-compose.yaml" restart
     if [[ ${2} == server ]]; then
