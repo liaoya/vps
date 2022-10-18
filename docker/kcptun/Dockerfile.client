@@ -1,6 +1,7 @@
 ARG ALPINE_BASE
 #hadolint ignore=DL3006
 FROM $ALPINE_BASE
+SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
 # hadolint ignore=DL3018
 RUN set -eux ; \
