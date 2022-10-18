@@ -79,7 +79,7 @@ if [[ ${1} != clean && ${1} != restart && ${1} != start && ${1} != stop ]] || [[
     print_usage
     exit 1
 fi
-if [[ $# -eq 1 && ! ${1} != clean ]] ; then
+if [[ $# -eq 1 && ${1} != clean ]] ; then
     echo "The second parameter is required for ${1}"
     exit 1
 fi
