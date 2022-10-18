@@ -82,7 +82,7 @@ if [[ ${1} == clean ]]; then
             bash "${_dir}clean.sh"
         fi
     done < <(ls -1d ${ROOT_DIR}/*/)
-    _delete_ufw_port "${XRAY[KCPTUN_PORT]}" "${XRAY[MKCP_PORT]}"
+    _delete_ufw_port "${XRAY[PORT]}" "${XRAY[MKCP_PORT]}"
 elif [[ ${1} == restart ]]; then
     docker-compose -p "${PROJECT}" -f "${ROOT_DIR}/${2}/docker-compose.yaml" restart
     if [[ ${2} == server ]]; then
