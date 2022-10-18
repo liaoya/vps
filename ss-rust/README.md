@@ -27,35 +27,15 @@ bash run.sh clean server
 ## ShadowSocks Client
 
 ```bash
-# Clean the environment (optional)
-rm -f .options
-
-# start the service, this is prefer
-env KCPTUN_PORT= SHADOWSOCKS_PASSWORD= SHADOWSOCKS_PORT= bash run.sh start client
-
-# start the service with sip003
-env SHADOWSOCKS_PASSWORD= SHADOWSOCKS_PORT= SHADOWSOCKS_SERVER= bash run.sh -p xray-plugin -m "mode=grpc" start client
-env KCPTUN_PORT= SHADOWSOCKS_PASSWORD= SHADOWSOCKS_PORT= SHADOWSOCKS_SERVER= SIP003_PLUGIN=xray-plugin SIP003_PLUGIN_OPTS=mode=grpc bash run.sh start client
-
-# stop and remove the service
-bash run.sh clean client
+# Fill .option, does not forget shadowsocks_server
+bash run.sh clean client; bash run.sh start client
 ```
 
 ## KCP client
 
 ```bash
-# The following is optional
-rm -f .options
-
-# start the service, this is prefer
-env KCPTUN_PORT= SHADOWSOCKS_PASSWORD= SHADOWSOCKS_PORT= bash run.sh start client
-
-# start the service with sip003
-env KCPTUN_PORT= SHADOWSOCKS_PASSWORD= SHADOWSOCKS_PORT= SHADOWSOCKS_SERVER= bash run.sh -p xray-plugin -m "mode=grpc" start kcp
-env KCPTUN_PORT= SHADOWSOCKS_PASSWORD= SHADOWSOCKS_PORT= SHADOWSOCKS_SERVER= SIP003_PLUGIN=xray-plugin SIP003_PLUGIN_OPTS=mode=grpc bash run.sh start kcp
-
-# stop and remove the container
-bash run.sh clean kcp
+# Fill .option, does not forget shadowsocks_server
+bash run.sh clean kcp; bash run.sh start kcp
 ```
 
 Run `curl --proxy "http://localhost:1080" -Lv http://httpbin.org/get` test

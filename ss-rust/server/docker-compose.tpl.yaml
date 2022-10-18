@@ -1,6 +1,6 @@
 services:
   kcptun-server:
-    command: ["/usr/local/bin/client", "-c", "/etc/kcptun.json"]
+    command: ["/usr/local/bin/server", "-c", "/etc/kcptun.json"]
     image: docker.io/yaekee/kcptun-server:${KCPTUN_VERSION}
     ports:
       - 12948:12948/tcp
