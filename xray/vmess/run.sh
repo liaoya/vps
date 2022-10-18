@@ -7,14 +7,10 @@ ROOT_DIR=$(readlink -f "${BASH_SOURCE[0]}")
 ROOT_DIR=$(dirname "${ROOT_DIR}")
 export ROOT_DIR
 
-function _check_command() {
-    while (($#)); do
-        if [[ -z $(command -v "${1}") ]]; then
-            echo "Command ${1} is required"
-            return 1
-        fi
-        shift
-    done
+function print_usage() {
+    cat <<EOF
+Usage: $(basename "${BASH_SOURCE[0]}") [-h] [-v] <clean|restart|start|stop> <client|server>
+EOF
 }
 
 function _add_ufw_port() {
@@ -35,23 +31,12 @@ function _delete_ufw_port() {
     done
 }
 
-function print_usage() {
-    cat <<EOF
-Usage: $(basename "${BASH_SOURCE[0]}") options <clean|restart|start|stop> <client|kcp|server>
-  -m, SIP003_PLUGIN_OPTS: sip003 plugin_opts. ${SHADOWSOCKS[SIP003_PLUGIN]:+The default is ${SHADOWSOCKS[SIP003_PLUGIN_OPTS]}}
-  -p, SIP003_PLUGIN: Shadowsocks sip003 plugin. ${SHADOWSOCKS[SIP003_PLUGIN_OPTS]:+The default is ${SHADOWSOCKS[SIP003_PLUGIN]}}
-  -v, VERBOSE
-EOF
-}
-
-_check_command docker docker-compose jq yq
-
-declare -A SHADOWSOCKS
-export SHADOWSOCKS
+declare -A XRAY
+export XRAY
 
 if [[ -f "${ROOT_DIR}/pre.sh" ]]; then source "${ROOT_DIR}/pre.sh"; fi
 
-while getopts ":hvm:p:" opt; do
+while getopts ":hv" opt; do
     case $opt in
     h)
         print_usage
@@ -60,12 +45,6 @@ while getopts ":hvm:p:" opt; do
     v)
         set -x
         export PS4='+(${BASH_SOURCE[0]}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
-        ;;
-    m)
-        SHADOWSOCKS[SIP003_PLUGIN_OPTS]=$OPTARG
-        ;;
-    p)
-        SHADOWSOCKS[SIP003_PLUGIN]=$OPTARG
         ;;
     \?)
         print_usage
@@ -83,27 +62,26 @@ fi
 PROJECT=$(basename "${ROOT_DIR}")
 
 if [[ -f "$2/env.sh" ]]; then source "$2/env.sh"; fi
-
 if [[ $1 == clean ]]; then
-    docker-compose -p "${PROJECT}" -f "${2}/docker-compose.yaml" down -v
+    docker-compose -p "${PROJECT}" -f "${2}/docker-compose.yaml" down -v || true
+    rm -f "${2}"/config.json "${2}"/config-*.json || true
     if [[ $2 == server ]]; then
-        _delete_ufw_port "${SHADOWSOCKS[KCPTUN_PORT]}" "${SHADOWSOCKS[SHADOWSOCKS_PORT]}"
+        _delete_ufw_port "${XRAY[PORT]}" "${XRAY[MKCP_PORT]}"
     fi
-    [[ -x "${2}/clean.sh" ]] && source "${2}/clean.sh"
+    [[ -x "${2}/clean.sh" ]] && "${2}/clean.sh"
 elif [[ $1 == restart ]]; then
     docker-compose -p "${PROJECT}" -f "${2}/docker-compose.yaml" restart
     if [[ $2 == server ]]; then
-        _add_ufw_port "${SHADOWSOCKS[KCPTUN_PORT]}" "${SHADOWSOCKS[SHADOWSOCKS_PORT]}"
+        _add_ufw_port "${XRAY[PORT]}" "${XRAY[MKCP_PORT]}"
     fi
 elif [[ $1 == start ]]; then
     docker-compose -p "${PROJECT}" -f "${2}/docker-compose.yaml" up -d
     if [[ $2 == server ]]; then
-        _add_ufw_port "${SHADOWSOCKS[KCPTUN_PORT]}" "${SHADOWSOCKS[SHADOWSOCKS_PORT]}"
+        _add_ufw_port "${XRAY[PORT]}" "${XRAY[MKCP_PORT]}"
     fi
 elif [[ $1 == stop ]]; then
     docker-compose -p "${PROJECT}" -f "${2}/docker-compose.yaml" stop
 else
     echo "Unknown opereation"
 fi
-
 if [[ -f "${ROOT_DIR}/post.sh" ]]; then source "${ROOT_DIR}/post.sh"; fi
