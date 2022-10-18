@@ -21,14 +21,14 @@ env KCPTUN_PORT= SHADOWSOCKS_PASSWORD= SHADOWSOCKS_PORT= bash run.sh -p xray-plu
 env KCPTUN_PORT= SHADOWSOCKS_PASSWORD= SHADOWSOCKS_PORT= SHADOWSOCKS_SERVER= SIP003_PLUGIN=xray-plugin SIP003_PLUGIN_OPTS=mode=grpc bash run.sh start server
 
 # stop and remove the service
-bash run.sh clean server
+bash run.sh clean; bash run start server
 ```
 
 ## ShadowSocks Client
 
 ```bash
 # Fill .option, does not forget shadowsocks_server
-bash run.sh clean client; bash run.sh start client
+bash run.sh clean; bash run.sh start client
 ```
 
 ## KCP client
@@ -43,7 +43,7 @@ Run `curl --proxy "http://localhost:1080" -Lv http://httpbin.org/get` test
 If you met any issues, try to run the following to clean any configurations
 
 ```bash
-bash run.sh clean client; bash run.sh clean kcp; bash run.sh clean server
+bash run.sh clean
 ```
 
 ## `.options` Examples

@@ -75,27 +75,30 @@ while getopts ":hvm:p:" opt; do
 done
 shift $((OPTIND - 1))
 
-if [[ $# -ne 2 ]] || [[ ${1} != clean && ${1} != restart && ${1} != start && ${1} != stop ]] || [[ ! -d "${ROOT_DIR}/${2}" ]]; then
+if [[ ${1} != clean && ${1} != restart && ${1} != start && ${1} != stop ]] || [[ $# -eq 2 && ! -d "${ROOT_DIR}/${2}" ]]; then
     print_usage
     exit 1
 fi
 
-PROJECT=$(basename "${ROOT_DIR}")-${2}
-
+PROJECT=$(basename "${ROOT_DIR}")
+if [[ $# -eq 2 ]]; then
 if [[ -f "${ROOT_DIR}/${2}/env.sh" ]]; then source "${ROOT_DIR}/${2}/env.sh"; fi
 if [[ ! -f "${ROOT_DIR}/${2}/docker-compose.yaml" ]]; then
     echo "${ROOT_DIR}/${2}/docker-compose.yaml is not generated"
     exit 1
 fi
+fi
 
 if [[ ${1} == clean ]]; then
-    if [[ -f "${ROOT_DIR}/${2}/docker-compose.yaml" ]]; then
-        docker-compose -p "${PROJECT}" -f "${ROOT_DIR}/${2}/docker-compose.yaml" down -v || true
-    else
-        while IFS= read -r _container; do
-            docker container rm -f -v "${_container}"
-        done < <(docker ps -a --format '{{.Names}}' | grep -E "^${PROJECT}")
-    fi
+    while IFS= read -r _container; do
+        docker container rm -f -v "${_container}"
+    done < <(docker ps -a --format '{{.Names}}' | grep -E "^${PROJECT}")
+    #shellcheck disable=SC2086
+    while IFS= read -r _dir; do
+        if [[ -f "${_dir}clean.sh" ]]; then
+            bash "${_dir}clean.sh"
+        fi
+    done < <(ls -1d ${ROOT_DIR}/*/)
     if [[ ${2} == server ]]; then
         _delete_ufw_port "${SHADOWSOCKS[KCPTUN_PORT]}" "${SHADOWSOCKS[SHADOWSOCKS_PORT]}"
     fi
