@@ -29,7 +29,7 @@ function _read_param() {
 _read_param kcptun_port $((RANDOM % 30000 + 20000))
 _read_param kcptun_version
 _read_param shadowsocks_password "$(tr -cd '[:alnum:]' </dev/urandom | fold -w30 | head -n1)"
-_read_param shadowsocks_port $((RANDOM % 30000 + 10000))
+_read_param shadowsocks_port $((RANDOM % 10000 + 20000))
 _read_param shadowsocks_rust_version
 _read_param shadowsocks_server ""
 _read_param sip003_plugin_opts ""

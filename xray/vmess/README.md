@@ -16,4 +16,5 @@ Change `.options` and run
 ./run.sh clean client; ./run.sh start client
 
 ./run.sh clean server; ./run.sh start server
+env MKCP_SEED= ./run.sh start server
 ```

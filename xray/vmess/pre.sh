@@ -27,7 +27,7 @@ function _read_param() {
 }
 
 _read_param alterid $((RANDOM % 70 + 30))
-_read_param port $((RANDOM % 10000 + 30000))
+_read_param port $((RANDOM % 10000 + 20000))
 _read_param uuid "$(cat /proc/sys/kernel/random/uuid)"
 _read_param mux_concurrency 4
 _read_param server ""
@@ -39,7 +39,7 @@ _read_param mkcp_client_up_capacity 50
 _read_param mkcp_header_type none
 _read_param mkcp_seed "$(tr -cd '[:alnum:]' </dev/urandom | fold -w15 | head -n1)"
 # _read_param mkcp_seed ""
-_read_param mkcp_port $((RANDOM % 10000 + 30000))
+_read_param mkcp_port $((RANDOM % 10000 + 20000))
 _read_param mkcp_server_down_capacity 200
 _read_param mkcp_server_up_capacity 200
 _read_param mkcp_uuid "$(cat /proc/sys/kernel/random/uuid)"

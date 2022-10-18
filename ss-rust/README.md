@@ -1,6 +1,6 @@
 # README
 
-This repo help to setup a Shadowsocks proxy support
+This repo help to setup a Shadowsocks proxy support. Android client can not support both xray-plugin and kcptun plugin.
 
 - kcptun (Use this for `CN2` VPS)
 - sip003 (xray-plugin)
@@ -13,12 +13,12 @@ The server will always start with a kcptun service, sip003 is optional
 # Clean the environment (optional)
 rm -f .options
 
-# start the service with sip003, this is prefer
+# start the service, this is prefer
+env KCPTUN_PORT= SHADOWSOCKS_PASSWORD= SHADOWSOCKS_PORT= bash run.sh start server
+
+# start the service with sip003
 env KCPTUN_PORT= SHADOWSOCKS_PASSWORD= SHADOWSOCKS_PORT= bash run.sh -p xray-plugin -m "mode=grpc" start server
 env KCPTUN_PORT= SHADOWSOCKS_PASSWORD= SHADOWSOCKS_PORT= SHADOWSOCKS_SERVER= SIP003_PLUGIN=xray-plugin SIP003_PLUGIN_OPTS=mode=grpc bash run.sh start server
-
-# start the service
-env KCPTUN_PORT= SHADOWSOCKS_PASSWORD= SHADOWSOCKS_PORT= bash run.sh start server
 
 # stop and remove the service
 bash run.sh clean server
@@ -30,12 +30,12 @@ bash run.sh clean server
 # Clean the environment (optional)
 rm -f .options
 
-# start the service with sip003, this is prefer
+# start the service, this is prefer
+env KCPTUN_PORT= SHADOWSOCKS_PASSWORD= SHADOWSOCKS_PORT= bash run.sh start client
+
+# start the service with sip003
 env SHADOWSOCKS_PASSWORD= SHADOWSOCKS_PORT= SHADOWSOCKS_SERVER= bash run.sh -p xray-plugin -m "mode=grpc" start client
 env KCPTUN_PORT= SHADOWSOCKS_PASSWORD= SHADOWSOCKS_PORT= SHADOWSOCKS_SERVER= SIP003_PLUGIN=xray-plugin SIP003_PLUGIN_OPTS=mode=grpc bash run.sh start client
-
-# start the service
-env KCPTUN_PORT= SHADOWSOCKS_PASSWORD= SHADOWSOCKS_PORT= bash run.sh start client
 
 # stop and remove the service
 bash run.sh clean client
@@ -47,12 +47,12 @@ bash run.sh clean client
 # The following is optional
 rm -f .options
 
-# start the service with sip003, this is prefer
+# start the service, this is prefer
+env KCPTUN_PORT= SHADOWSOCKS_PASSWORD= SHADOWSOCKS_PORT= bash run.sh start client
+
+# start the service with sip003
 env KCPTUN_PORT= SHADOWSOCKS_PASSWORD= SHADOWSOCKS_PORT= SHADOWSOCKS_SERVER= bash run.sh -p xray-plugin -m "mode=grpc" start kcp
 env KCPTUN_PORT= SHADOWSOCKS_PASSWORD= SHADOWSOCKS_PORT= SHADOWSOCKS_SERVER= SIP003_PLUGIN=xray-plugin SIP003_PLUGIN_OPTS=mode=grpc bash run.sh start kcp
-
-# start the service
-env KCPTUN_PORT= SHADOWSOCKS_PASSWORD= SHADOWSOCKS_PORT= bash run.sh start client
 
 # stop and remove the container
 bash run.sh clean kcp
