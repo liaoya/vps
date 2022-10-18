@@ -54,31 +54,35 @@ while getopts ":hv" opt; do
 done
 shift $((OPTIND - 1))
 
-if [[ $# -ne 2 ]] || [[ ${1} != clean && ${1} != restart && ${1} != start && ${1} != stop ]] || [[ ! -d "${ROOT_DIR}/${2}" ]]; then
+if [[ ${1} != clean && ${1} != restart && ${1} != start && ${1} != stop ]] || [[ $# -eq 2 && ! -d "${ROOT_DIR}/${2}" ]]; then
     print_usage
+    exit 1
+fi
+if [[ $# -eq 1 && ! ${1} != clean ]] ; then
+    echo "The second parameter is required for ${1}"
     exit 1
 fi
 
 PROJECT=$(basename "${ROOT_DIR}")
-
-if [[ -f "${ROOT_DIR}/${2}/env.sh" ]]; then source "${ROOT_DIR}/${2}/env.sh"; fi
-if [[ ! -f "${ROOT_DIR}/${2}/docker-compose.yaml" ]]; then
-    echo "${ROOT_DIR}/${2}/docker-compose.yaml is not generated"
-    exit 1
+if [[ $# -eq 2 ]]; then
+    if [[ -f "${ROOT_DIR}/${2}/env.sh" ]]; then source "${ROOT_DIR}/${2}/env.sh"; fi
+    if [[ ! -f "${ROOT_DIR}/${2}/docker-compose.yaml" ]]; then
+        echo "${ROOT_DIR}/${2}/docker-compose.yaml is not generated"
+        exit 1
+    fi
 fi
 
 if [[ ${1} == clean ]]; then
-    if [[ -f "${ROOT_DIR}/${2}/docker-compose.yaml" ]]; then
-        docker-compose -p "${PROJECT}" -f "${ROOT_DIR}/${2}/docker-compose.yaml" down -v || true
-    else
-        while IFS= read -r _container; do
-            docker container rm -f -v "${_container}"
-        done < <(docker ps -a --format '{{.Names}}' | grep -E "^${PROJECT}")
-    fi
-    if [[ ${2} == server ]]; then
-        _delete_ufw_port "${XRAY[PORT]}" "${XRAY[MKCP_PORT]}"
-    fi
-    [[ -x "${ROOT_DIR}/${2}/clean.sh" ]] && "${ROOT_DIR}/${2}/clean.sh"
+    while IFS= read -r _container; do
+        docker container rm -f -v "${_container}"
+    done < <(docker ps -a --format '{{.Names}}' | grep -E "^${PROJECT}")
+    #shellcheck disable=SC2086
+    while IFS= read -r _dir; do
+        if [[ -f "${_dir}clean.sh" ]]; then
+            bash "${_dir}clean.sh"
+        fi
+    done < <(ls -1d ${ROOT_DIR}/*/)
+    _delete_ufw_port "${SHADOWSOCKS[KCPTUN_PORT]}" "${SHADOWSOCKS[SHADOWSOCKS_PORT]}"
 elif [[ ${1} == restart ]]; then
     docker-compose -p "${PROJECT}" -f "${ROOT_DIR}/${2}/docker-compose.yaml" restart
     if [[ ${2} == server ]]; then

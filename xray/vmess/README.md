@@ -13,8 +13,8 @@ curl --proxy http://localhost:1090 -Lv http://httpbin.org/get
 Change `.options` and run
 
 ```bash
-./run.sh clean client; ./run.sh start client
+./run.sh clean; ./run.sh start client
 
-./run.sh clean server; ./run.sh start server
+./run.sh clean; ./run.sh start server
 env MKCP_SEED= ./run.sh start server
 ```

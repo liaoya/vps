@@ -79,14 +79,18 @@ if [[ ${1} != clean && ${1} != restart && ${1} != start && ${1} != stop ]] || [[
     print_usage
     exit 1
 fi
+if [[ $# -eq 1 && ! ${1} != clean ]] ; then
+    echo "The second parameter is required for ${1}"
+    exit 1
+fi
 
 PROJECT=$(basename "${ROOT_DIR}")
 if [[ $# -eq 2 ]]; then
-if [[ -f "${ROOT_DIR}/${2}/env.sh" ]]; then source "${ROOT_DIR}/${2}/env.sh"; fi
-if [[ ! -f "${ROOT_DIR}/${2}/docker-compose.yaml" ]]; then
-    echo "${ROOT_DIR}/${2}/docker-compose.yaml is not generated"
-    exit 1
-fi
+    if [[ -f "${ROOT_DIR}/${2}/env.sh" ]]; then source "${ROOT_DIR}/${2}/env.sh"; fi
+    if [[ ! -f "${ROOT_DIR}/${2}/docker-compose.yaml" ]]; then
+        echo "${ROOT_DIR}/${2}/docker-compose.yaml is not generated"
+        exit 1
+    fi
 fi
 
 if [[ ${1} == clean ]]; then
