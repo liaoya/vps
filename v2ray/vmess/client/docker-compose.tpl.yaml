@@ -8,7 +8,7 @@ services:
       - 1081:1081
     restart: always
     volumes:
-      - "./config.json:/etc/xray/config.json"
+      - "./config.json:/etc/v2ray/config.json"
 
   client-mkcp:
     image: docker.io/teddysun/v2ray:${V2RAY_IMAGE_VERSION}
@@ -17,4 +17,4 @@ services:
       - 1091:1091
     restart: always
     volumes:
-      - "./config-mkcp.json:/etc/xray/config.json"
+      - "./config-mkcp.json:/etc/v2ray/config.json"

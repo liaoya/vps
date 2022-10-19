@@ -9,4 +9,4 @@ services:
       - "${V2RAY_MKCP_PORT}:${V2RAY_MKCP_PORT}/udp"
     restart: always
     volumes:
-      - "./config.json:/etc/xray/config.json"
+      - "./config.json:/etc/v2ray/config.json"
