@@ -26,6 +26,9 @@ function _read_param() {
     XRAY[${_upper}]=${XRAY[${_upper}]:-""}
 }
 
+tracestate=$(shopt -po xtrace) || true
+set +x
+
 _read_param alterid $((RANDOM % 70 + 30))
 _read_param port $((RANDOM % 10000 + 20000))
 _read_param uuid "$(cat /proc/sys/kernel/random/uuid)"
@@ -44,14 +47,13 @@ _read_param mkcp_server_down_capacity 200
 _read_param mkcp_server_up_capacity 200
 _read_param mkcp_uuid "$(cat /proc/sys/kernel/random/uuid)"
 
+{
+    for key in "${!XRAY[@]}"; do echo "$key => ${XRAY[$key]}"; done
+} | sort
+
 _check_param MKCP_PORT MKCP_SEED MKCP_UUID PORT UUID XRAY_VERSION
 
-{
-    tracestate=$(shopt -po xtrace) || true
-    set +x
-    for key in "${!XRAY[@]}"; do echo "$key => ${XRAY[$key]}"; done
-    [[ -n "${tracestate}" ]] && eval "${tracestate}"
-} | sort
+[[ -n "${tracestate}" ]] && eval "${tracestate}"
 
 if [[ -z ${XRAY[XRAY_VERSION]} ]]; then
     XRAY_VERSION=${XRAY_VERSION:-$(curl -s "https://api.github.com/repos/teddysun/xray-plugin/tags" | jq -r '.[0].name')}

@@ -26,6 +26,9 @@ function _read_param() {
     SHADOWSOCKS[${_upper}]=${SHADOWSOCKS[${_upper}]:-""}
 }
 
+tracestate=$(shopt -po xtrace) || true
+set +x
+
 _read_param kcptun_port $((RANDOM % 30000 + 20000))
 _read_param kcptun_version
 _read_param shadowsocks_password "$(tr -cd '[:alnum:]' </dev/urandom | fold -w30 | head -n1)"
@@ -57,13 +60,14 @@ if [[ -z ${SHADOWSOCKS[XRAY_PLUGIN_VERSION]} ]]; then
     XRAY_PLUGIN_VERSION=${XRAY_PLUGIN_VERSION:-v1.6.0}
     SHADOWSOCKS[XRAY_PLUGIN_VERSION]="${XRAY_PLUGIN_VERSION}"
 fi
+
 {
-    tracestate=$(shopt -po xtrace) || true
-    set +x
     for key in "${!SHADOWSOCKS[@]}"; do echo "$key => ${SHADOWSOCKS[$key]}"; done
-    [[ -n "${tracestate}" ]] && eval "${tracestate}"
 } | sort
+
 _check_param KCPTUN_PORT KCPTUN_VERSION SHADOWSOCKS_PASSWORD SHADOWSOCKS_PORT SHADOWSOCKS_RUST_VERSION XRAY_PLUGIN_VERSION
+
+[[ -n "${tracestate}" ]] && eval "${tracestate}"
 
 if [[ -n ${SHADOWSOCKS[SIP003_PLUGIN]} ]]; then
     if [[ ${SHADOWSOCKS[SIP003_PLUGIN]} == xray-plugin ]] && [[ ! -x "${ROOT_DIR}/xray-plugin_linux_amd64" ]]; then

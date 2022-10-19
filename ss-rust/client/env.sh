@@ -3,10 +3,7 @@
 _THIS_DIR=$(readlink -f "${BASH_SOURCE[0]}")
 _THIS_DIR=$(dirname "${_THIS_DIR}")
 
-if [[ -z ${SHADOWSOCKS[SHADOWSOCKS_SERVER]} ]]; then
-    echo "Please assign \${SHADOWSOCKS[SHADOWSOCKS_SERVER]}"
-    exit 1
-fi
+_check_param SHADOWSOCKS_SERVER
 
 if [[ ! -f "${_THIS_DIR}/docker-compose.yaml" ]]; then
     envsubst "$(env | sort | sed -e 's/=.*//' -e 's/^/\$/g')" <"${_THIS_DIR}/docker-compose.tpl.yaml" | tee "${_THIS_DIR}/docker-compose.yaml"

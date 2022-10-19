@@ -8,6 +8,8 @@ if [[ -z ${SHADOWSOCKS[SHADOWSOCKS_SERVER]} ]]; then
     exit 1
 fi
 
+_check_param SHADOWSOCKS_SERVER
+
 export SHADOWSOCKS_SERVER=${SHADOWSOCKS[SHADOWSOCKS_SERVER]}
 
 if [[ ! -f "${_THIS_DIR}/docker-compose.yaml" ]]; then
