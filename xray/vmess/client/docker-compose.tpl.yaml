@@ -1,7 +1,7 @@
 version: "3"
 
 services:
-  v2ray:
+  client:
     image: docker.io/teddysun/xray:${XRAY_IMAGE_VERSION}
     ports:
       - 1080:1080
@@ -10,7 +10,7 @@ services:
     volumes:
       - "./config.json:/etc/xray/config.json"
 
-  v2ray-mkcp:
+  client-mkcp:
     image: docker.io/teddysun/xray:${XRAY_IMAGE_VERSION}
     ports:
       - 1090:1090

@@ -7,7 +7,7 @@ services:
     volumes:
       - "./kcptun-client.json:/etc/kcptun.json"
 
-  sslocal-rust:
+  sslocal:
     image: ghcr.io/shadowsocks/sslocal-rust:${SHADOWSOCKS_RUST_VERSION}
     ports:
       - "1080:1080/tcp"

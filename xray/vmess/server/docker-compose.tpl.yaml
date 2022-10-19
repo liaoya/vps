@@ -1,7 +1,7 @@
 version: "3"
 
 services:
-  v2ray:
+  server:
     image: docker.io/teddysun/xray:${XRAY_IMAGE_VERSION}
 
     ports:
