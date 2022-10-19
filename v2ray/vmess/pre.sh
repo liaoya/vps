@@ -2,8 +2,8 @@
 
 function _check_param() {
     while (($#)); do
-        if [[ -z ${XRAY[$1]} ]]; then
-            echo "\${XRAY[$1]} is required"
+        if [[ -z ${V2RAY[$1]} ]]; then
+            echo "\${V2RAY[$1]} is required"
             exit 1
         fi
         shift 1
@@ -15,15 +15,15 @@ function _read_param() {
     _lower=${1,,}
     _upper=${1^^}
     if [[ -f "${ROOT_DIR}/.options" ]]; then
-        XRAY[${_upper}]=$(grep -i "^${_lower}=" "${ROOT_DIR}/.options" | cut -d'=' -f2-)
+        V2RAY[${_upper}]=$(grep -i "^${_lower}=" "${ROOT_DIR}/.options" | cut -d'=' -f2-)
     fi
     if [[ -n ${!_upper} ]]; then
-        XRAY[${_upper}]=${XRAY[${_upper}]:-${!_upper}}
+        V2RAY[${_upper}]=${V2RAY[${_upper}]:-${!_upper}}
     fi
     if [[ $# -gt 1 ]]; then
-        XRAY[${_upper}]=${XRAY[${_upper}]:-${2}}
+        V2RAY[${_upper}]=${V2RAY[${_upper}]:-${2}}
     fi
-    XRAY[${_upper}]=${XRAY[${_upper}]:-""}
+    V2RAY[${_upper}]=${V2RAY[${_upper}]:-""}
 }
 
 tracestate=$(shopt -po xtrace) || true
@@ -34,7 +34,7 @@ _read_param port $((RANDOM % 10000 + 20000))
 _read_param uuid "$(cat /proc/sys/kernel/random/uuid)"
 _read_param mux_concurrency 4
 _read_param server ""
-_read_param xray_version
+_read_param v2ray_version
 
 _read_param mkcp_alterid $((RANDOM % 70 + 30))
 _read_param mkcp_client_down_capacity 200
@@ -48,17 +48,17 @@ _read_param mkcp_server_up_capacity 200
 _read_param mkcp_uuid "$(cat /proc/sys/kernel/random/uuid)"
 
 {
-    for key in "${!XRAY[@]}"; do echo "$key => ${XRAY[$key]}"; done
+    for key in "${!V2RAY[@]}"; do echo "$key => ${V2RAY[$key]}"; done
 } | sort
 
-_check_param MKCP_PORT MKCP_SEED MKCP_UUID PORT UUID XRAY_VERSION
+_check_param MKCP_PORT MKCP_SEED MKCP_UUID PORT UUID V2RAY_VERSION
 
 [[ -n "${tracestate}" ]] && eval "${tracestate}"
 
-if [[ -z ${XRAY[XRAY_VERSION]} ]]; then
-    XRAY_VERSION=${XRAY_VERSION:-$(curl -s "https://api.github.com/repos/teddysun/xray-plugin/tags" | jq -r '.[0].name')}
-    XRAY_VERSION=${XRAY_VERSION:-v1.6.0}
-    XRAY[XRAY_VERSION]="${XRAY_VERSION}"
+if [[ -z ${V2RAY[V2RAY_VERSION]} ]]; then
+    V2RAY_VERSION=${V2RAY_VERSION:-$(curl -s "https://api.github.com/repos/v2fly/v2ray-core/tags" | jq -r '.[0].name')}
+    V2RAY_VERSION=${V2RAY_VERSION:-v5.1.0}
+    V2RAY[V2RAY_VERSION]="${V2RAY_VERSION}"
 fi
 
-export XRAY_IMAGE_VERSION=${XRAY[XRAY_VERSION]:1}
+export V2RAY_IMAGE_VERSION=${V2RAY[V2RAY_VERSION]:1}

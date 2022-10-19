@@ -1,0 +1,12 @@
+version: "3"
+
+services:
+  server:
+    image: docker.io/teddysun/v2ray:${V2RAY_IMAGE_VERSION}
+
+    ports:
+      - "${V2RAY_PORT}:${V2RAY_PORT}"
+      - "${V2RAY_MKCP_PORT}:${V2RAY_MKCP_PORT}/udp"
+    restart: always
+    volumes:
+      - "./config.json:/etc/xray/config.json"
