@@ -84,7 +84,9 @@ if [[ $# -eq 1 && ${1} != clean ]] ; then
     exit 1
 fi
 
-PROJECT=$(basename "${ROOT_DIR}")
+COMPOSE_PROJECT_NAME=$(basename "${ROOT_DIR}")
+export COMPOSE_PROJECT_NAME
+
 if [[ $# -eq 2 ]]; then
     if [[ -f "${ROOT_DIR}/${2}/env.sh" ]]; then source "${ROOT_DIR}/${2}/env.sh"; fi
     if [[ ! -f "${ROOT_DIR}/${2}/docker-compose.yaml" ]]; then
@@ -96,7 +98,7 @@ fi
 if [[ ${1} == clean ]]; then
     while IFS= read -r _container; do
         docker container rm -f -v "${_container}"
-    done < <(docker ps -a --format '{{.Names}}' | grep -E "^${PROJECT}")
+    done < <(docker ps -a --format '{{.Names}}' | grep -E "^${COMPOSE_PROJECT_NAME}")
     #shellcheck disable=SC2086
     while IFS= read -r _dir; do
         if [[ -f "${_dir}clean.sh" ]]; then
@@ -105,17 +107,17 @@ if [[ ${1} == clean ]]; then
     done < <(ls -1d ${ROOT_DIR}/*/)
     _delete_ufw_port "${SHADOWSOCKS[KCPTUN_PORT]}" "${SHADOWSOCKS[SHADOWSOCKS_PORT]}"
 elif [[ ${1} == restart ]]; then
-    docker-compose -p "${PROJECT}" -f "${ROOT_DIR}/${2}/docker-compose.yaml" restart
+    docker-compose -f "${ROOT_DIR}/${2}/docker-compose.yaml" restart
     if [[ ${2} == server ]]; then
         _add_ufw_port "${SHADOWSOCKS[KCPTUN_PORT]}" "${SHADOWSOCKS[SHADOWSOCKS_PORT]}"
     fi
 elif [[ ${1} == start ]]; then
-    docker-compose -p "${PROJECT}" -f "${ROOT_DIR}/${2}/docker-compose.yaml" up -d
+    docker-compose -f "${ROOT_DIR}/${2}/docker-compose.yaml" up -d
     if [[ ${2} == server ]]; then
         _add_ufw_port "${SHADOWSOCKS[KCPTUN_PORT]}" "${SHADOWSOCKS[SHADOWSOCKS_PORT]}"
     fi
 elif [[ ${1} == stop ]]; then
-    docker-compose -p "${PROJECT}" -f "${ROOT_DIR}/${2}/docker-compose.yaml" stop
+    docker-compose -f "${ROOT_DIR}/${2}/docker-compose.yaml" stop
 else
     echo "Unknown opereation"
 fi

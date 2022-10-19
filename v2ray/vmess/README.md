@@ -18,3 +18,5 @@ Change `.options` and run
 ./run.sh clean; ./run.sh start server
 env MKCP_SEED= ./run.sh start server
 ```
+
+We have issue to use the same configuration with xray as the server, no problem as the client.
