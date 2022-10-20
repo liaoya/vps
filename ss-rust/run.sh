@@ -36,11 +36,18 @@ function _delete_ufw_port() {
 }
 
 function print_usage() {
+    local _candidate _item
+    #shellcheck disable=SC2010
+    while IFS= read -r _item; do
+        _candidate=${_candidate:+${_candidate}|}$(basename "${_item}")
+    done < <(ls -1d "${ROOT_DIR}"/*/)
     cat <<EOF
-Usage: $(basename "${BASH_SOURCE[0]}") options <clean|restart|start|stop> <client|kcp|server>
-  -m, SIP003_PLUGIN_OPTS: sip003 plugin_opts. ${SHADOWSOCKS[SIP003_PLUGIN]:+The default is ${SHADOWSOCKS[SIP003_PLUGIN_OPTS]}}
-  -p, SIP003_PLUGIN: Shadowsocks sip003 plugin. ${SHADOWSOCKS[SIP003_PLUGIN_OPTS]:+The default is ${SHADOWSOCKS[SIP003_PLUGIN]}}
-  -v, VERBOSE
+Usage: $(basename "${BASH_SOURCE[0]}") options <clean|restart|start|stop> <${_candidate}>
+    -h, show the help
+    -v, verbose mode
+    -f EVNFILE, The environment file. ${EVNFILE:+the default is ${EVNFILE}}
+    -m SIP003_PLUGIN_OPTS, sip003 plugin_opts. ${SHADOWSOCKS[SIP003_PLUGIN]:+The default is ${SHADOWSOCKS[SIP003_PLUGIN_OPTS]}}
+    -p SIP003_PLUGIN, Shadowsocks sip003 plugin. ${SHADOWSOCKS[SIP003_PLUGIN_OPTS]:+The default is ${SHADOWSOCKS[SIP003_PLUGIN]}}
 EOF
 }
 
@@ -49,7 +56,7 @@ _check_command docker docker-compose jq yq
 declare -A SHADOWSOCKS
 export SHADOWSOCKS
 
-if [[ -f "${ROOT_DIR}/pre.sh" ]]; then source "${ROOT_DIR}/pre.sh"; fi
+EVNFILE=${EVNFILE:-"${ROOT_DIR}/.options"}
 
 while getopts ":hvm:p:" opt; do
     case $opt in
@@ -79,10 +86,14 @@ if [[ ${1} != clean && ${1} != restart && ${1} != start && ${1} != stop ]] || [[
     print_usage
     exit 1
 fi
-if [[ $# -eq 1 && ${1} != clean ]] ; then
+if [[ $# -eq 1 && ${1} != clean ]]; then
     echo "The second parameter is required for ${1}"
     exit 1
 fi
+
+if [[ -n ${EVNFILE} ]]; then touch "${EVNFILE}"; fi
+EVNFILE=$(readlink -f "${EVNFILE}")
+if [[ -f "${ROOT_DIR}/pre.sh" ]]; then source "${ROOT_DIR}/pre.sh"; fi
 
 COMPOSE_PROJECT_NAME=$(basename "${ROOT_DIR}")
 export COMPOSE_PROJECT_NAME

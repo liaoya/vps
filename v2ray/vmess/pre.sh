@@ -14,8 +14,8 @@ function _read_param() {
     local _lower _upper
     _lower=${1,,}
     _upper=${1^^}
-    if [[ -f "${ROOT_DIR}/.options" ]]; then
-        V2RAY[${_upper}]=$(grep -i "^${_lower}=" "${ROOT_DIR}/.options" | cut -d'=' -f2-)
+    if [[ -f "${EVNFILE}" ]]; then
+        V2RAY[${_upper}]=$(grep -i "^${_lower}=" "${EVNFILE}" | cut -d'=' -f2-)
     fi
     if [[ -n ${!_upper} ]]; then
         V2RAY[${_upper}]=${V2RAY[${_upper}]:-${!_upper}}
@@ -51,14 +51,14 @@ _read_param mkcp_uuid "$(cat /proc/sys/kernel/random/uuid)"
     for key in "${!V2RAY[@]}"; do echo "$key => ${V2RAY[$key]}"; done
 } | sort
 
-_check_param MKCP_PORT MKCP_SEED MKCP_UUID PORT UUID V2RAY_VERSION
-
-[[ -n "${tracestate}" ]] && eval "${tracestate}"
-
 if [[ -z ${V2RAY[V2RAY_VERSION]} ]]; then
     V2RAY_VERSION=${V2RAY_VERSION:-$(curl -s "https://api.github.com/repos/v2fly/v2ray-core/tags" | jq -r '.[0].name')}
     V2RAY_VERSION=${V2RAY_VERSION:-v5.1.0}
     V2RAY[V2RAY_VERSION]="${V2RAY_VERSION}"
 fi
+
+_check_param MKCP_PORT MKCP_SEED MKCP_UUID PORT UUID V2RAY_VERSION
+
+[[ -n "${tracestate}" ]] && eval "${tracestate}"
 
 export V2RAY_IMAGE_VERSION=${V2RAY[V2RAY_VERSION]:1}

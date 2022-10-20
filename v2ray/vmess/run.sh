@@ -8,8 +8,16 @@ ROOT_DIR=$(dirname "${ROOT_DIR}")
 export ROOT_DIR
 
 function print_usage() {
+    local _candidate _item
+    #shellcheck disable=SC2010
+    while IFS= read -r _item; do
+        _candidate=${_candidate:+${_candidate}|}$(basename "${_item}")
+    done < <(ls -1d "${ROOT_DIR}"/*/)
     cat <<EOF
-Usage: $(basename "${BASH_SOURCE[0]}") [-h] [-v] <clean|restart|start|stop> <client|server>
+Usage: $(basename "${BASH_SOURCE[0]}") OPTIONS <clean|restart|start|stop> <${_candidate}>
+    -h, show the help
+    -v, verbose mode
+    -f EVNFILE, The environment file. ${EVNFILE:+the default is ${EVNFILE}}
 EOF
 }
 
@@ -34,9 +42,9 @@ function _delete_ufw_port() {
 declare -A V2RAY
 export V2RAY
 
-if [[ -f "${ROOT_DIR}/pre.sh" ]]; then source "${ROOT_DIR}/pre.sh"; fi
+EVNFILE=${EVNFILE:-"${ROOT_DIR}/.options"}
 
-while getopts ":hv" opt; do
+while getopts ":hvf:" opt; do
     case $opt in
     h)
         print_usage
@@ -45,6 +53,9 @@ while getopts ":hv" opt; do
     v)
         set -x
         export PS4='+(${BASH_SOURCE[0]}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+        ;;
+    f)
+        EVNFILE=$(readlink -f "${OPTARG}")
         ;;
     \?)
         print_usage
@@ -58,10 +69,14 @@ if [[ ${1} != clean && ${1} != restart && ${1} != start && ${1} != stop ]] || [[
     print_usage
     exit 1
 fi
-if [[ $# -eq 1 && ${1} != clean ]] ; then
+if [[ $# -eq 1 && ${1} != clean ]]; then
     echo "The second parameter is required for ${1}"
     exit 1
 fi
+
+if [[ -n ${EVNFILE} ]]; then touch "${EVNFILE}"; fi
+EVNFILE=$(readlink -f "${EVNFILE}")
+if [[ -f "${ROOT_DIR}/pre.sh" ]]; then source "${ROOT_DIR}/pre.sh"; fi
 
 COMPOSE_PROJECT_NAME=$(basename "${ROOT_DIR}")
 export COMPOSE_PROJECT_NAME
@@ -84,7 +99,9 @@ if [[ ${1} == clean ]]; then
             bash "${_dir}clean.sh"
         fi
     done < <(ls -1d ${ROOT_DIR}/*/)
-    _delete_ufw_port "${V2RAY[PORT]}" "${V2RAY[MKCP_PORT]}"
+    if [[ ${2} == server ]]; then
+        _delete_ufw_port "${V2RAY[PORT]}" "${V2RAY[MKCP_PORT]}"
+    fi
 elif [[ ${1} == restart ]]; then
     docker-compose -f "${ROOT_DIR}/${2}/docker-compose.yaml" restart
     if [[ ${2} == server ]]; then

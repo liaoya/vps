@@ -14,8 +14,8 @@ function _read_param() {
     local _lower _upper
     _lower=${1,,}
     _upper=${1^^}
-    if [[ -f "${ROOT_DIR}/.options" ]]; then
-        SHADOWSOCKS[${_upper}]=$(grep -i "^${_lower}=" "${ROOT_DIR}/.options" | cut -d'=' -f2-)
+    if [[ -f "${EVNFILE}" ]]; then
+        SHADOWSOCKS[${_upper}]=$(grep -i "^${_lower}=" "${EVNFILE}" | cut -d'=' -f2-)
     fi
     if [[ -n ${!_upper} ]]; then
         SHADOWSOCKS[${_upper}]=${SHADOWSOCKS[${_upper}]:-${!_upper}}

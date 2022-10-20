@@ -6,7 +6,7 @@ _THIS_DIR=$(dirname "${_THIS_DIR}")
 _check_param SERVER
 
 if [[ ! -f "${_THIS_DIR}/docker-compose.yaml" ]]; then
-    envsubst "$(env | sort | sed -e 's/=.*//' -e 's/^/\$/g')" <"${_THIS_DIR}/docker-compose.tpl.yaml" | tee "${_THIS_DIR}/docker-compose.yaml"
+    envsubst "$(env | sort | sed -e 's/=.*//' -e 's/^/\$/g')" <"${_THIS_DIR}/docker-compose.tpl.yaml" >"${_THIS_DIR}/docker-compose.yaml"
 fi
 
 if [[ ! -f "${_THIS_DIR}/config.json" ]]; then
