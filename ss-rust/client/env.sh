@@ -24,8 +24,7 @@ if [[ ! -f "${_THIS_DIR}/ss-local.json" ]]; then
         jq --arg value "${SHADOWSOCKS[SHADOWSOCKS_SERVER]}" '.servers[0].address=$value' |
         jq --arg value "${SHADOWSOCKS[SHADOWSOCKS_PASSWORD]}" '.servers[0].password=$value' |
         jq ".servers[0].port=${SHADOWSOCKS[SHADOWSOCKS_PORT]}" |
-        jq -S . |
-        tee "${_THIS_DIR}/ss-local.json"
+        jq -S . >"${_THIS_DIR}/ss-local.json"
     if [[ -n ${SHADOWSOCKS[SIP003_PLUGIN]} ]]; then
         jq . "${_THIS_DIR}/ss-local.json" |
             jq --arg value "${SHADOWSOCKS[SIP003_PLUGIN]}" '.servers[0] |= . + {plugin: $value}' |

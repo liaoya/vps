@@ -58,7 +58,7 @@ export SHADOWSOCKS
 
 EVNFILE=${EVNFILE:-"${ROOT_DIR}/.options"}
 
-while getopts ":hvm:p:" opt; do
+while getopts ":hvf:m:p:" opt; do
     case $opt in
     h)
         print_usage
@@ -67,6 +67,9 @@ while getopts ":hvm:p:" opt; do
     v)
         set -x
         export PS4='+(${BASH_SOURCE[0]}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+        ;;
+    f)
+        EVNFILE=$(readlink -f "${OPTARG}")
         ;;
     m)
         SHADOWSOCKS[SIP003_PLUGIN_OPTS]=$OPTARG
