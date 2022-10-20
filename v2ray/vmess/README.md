@@ -19,4 +19,4 @@ Change `.options` and run
 env MKCP_SEED= ./run.sh start server
 ```
 
-We have issue to use the same configuration with xray as the server, no problem as the client.
+Always use v2ray for vmess protocol, never xray.
