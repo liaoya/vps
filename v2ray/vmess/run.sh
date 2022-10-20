@@ -99,9 +99,7 @@ if [[ ${1} == clean ]]; then
             bash "${_dir}clean.sh"
         fi
     done < <(ls -1d ${ROOT_DIR}/*/)
-    if [[ ${2} == server ]]; then
-        _delete_ufw_port "${V2RAY[PORT]}" "${V2RAY[MKCP_PORT]}"
-    fi
+    _delete_ufw_port "${V2RAY[PORT]}" "${V2RAY[MKCP_PORT]}"
 elif [[ ${1} == restart ]]; then
     docker-compose -f "${ROOT_DIR}/${2}/docker-compose.yaml" restart
     if [[ ${2} == server ]]; then
