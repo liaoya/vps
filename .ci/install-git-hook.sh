@@ -15,7 +15,7 @@ ROOT_DIR=\$(git rev-parse --show-toplevel)
 
 echo "Running validations..."
 "\${ROOT_DIR}/${THIS_DIR}/run-shellcheck.sh" "\${ROOT_DIR}"
-if command -v shfmt && [[ -n \$(shfmt -i 4 -d "\${ROOT_DIR}") ]]; then
+if command -v shfmt >/dev/null 2>&1 && [[ -n \$(shfmt -i 4 -d "\${ROOT_DIR}") ]]; then
     echo "Fail to run shfmt check, stage your change and run 'shfmt -i 4 -w \${ROOT_DIR}'"
     exit 1
 fi
