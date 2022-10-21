@@ -18,7 +18,7 @@ export DOCKER_BUILD_OPTS
 
 function check_command() {
     while (($#)); do
-        if ! command -v "${1}"; then
+        if ! command -v "${1}" >/dev/null 2>&1; then
             echo "Command ${1} is required"
             return 1
         fi

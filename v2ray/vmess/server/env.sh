@@ -7,7 +7,7 @@ export V2RAY_MKCP_PORT=${V2RAY[MKCP_PORT]}
 export V2RAY_PORT=${V2RAY[PORT]}
 
 if [[ ! -f "${_THIS_DIR}/docker-compose.yaml" ]]; then
-    envsubst "$(env | sort | sed -e 's/=.*//' -e 's/^/\$/g')" <"${_THIS_DIR}/docker-compose.tpl.yaml" | tee "${_THIS_DIR}/docker-compose.yaml"
+    envsubst "$(env | sort | sed -e 's/=.*//' -e 's/^/\$/g')" <"${_THIS_DIR}/docker-compose.tpl.yaml" >"${_THIS_DIR}/docker-compose.yaml"
 fi
 
 if [[ ! -f "${_THIS_DIR}/config.json" ]]; then
