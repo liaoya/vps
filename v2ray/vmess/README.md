@@ -19,4 +19,5 @@ Change `.options` and run
 env MKCP_SEED= ./run.sh start server
 ```
 
-Always use v2ray for vmess protocol, never xray.
+- Never use [mux](https://www.v2ray.com/chapter_02/mux.html)
+- Always use v2ray for vmess protocol, never xray.
