@@ -20,6 +20,7 @@ apt update -qq -y
 # apt upgrade -qq -y -o "Dpkg::Use-Pty=0"
 apt install -qq -y software-properties-common # for ppa
 
+apt install -qq -y bc
 VERSION=$(echo "$(lsb_release -r | cut -d':' -f2 | tr -d '[:space:]') * 100 / 1" | bc)
 
 declare -a ppa_repos
@@ -37,7 +38,7 @@ elif [[ ${VERSION} -eq 2004 ]]; then
     # ppa:mtvoid/ppa for emacs27
     # ppa:mjuhasz/backports for tmux 3.1b
     ppa_repos+=(ppa:savoury1/backports)
-    ppa_repos+=(ppa:fish-shell/release-3 ppa:jonathonf/vim ppa:kelebek333/xfce-4.16 ppa:mjuhasz/backports)
+    ppa_repos+=(ppa:ansible/ansible ppa:fish-shell/release-3 ppa:jonathonf/vim ppa:kelebek333/xfce-4.16 ppa:mjuhasz/backports)
 elif [[ ${VERSION} -eq 2204 ]]; then
     ppa_repos+=(ppa:savoury1/backports)
     ppa_repos+=(ppa:fish-shell/release-3 ppa:jonathonf/vim)
@@ -46,10 +47,10 @@ for ppa in "${ppa_repos[@]}"; do add-apt-repository -y "$ppa"; done
 apt update -qq -y
 apt upgrade -q -y
 
-apt install -qq -y certbot curl docker.io dos2unix fish git gnupg jq moreutils nmon nano sshpass tig tmux vim yq
+apt install -qq -y certbot curl docker.io dos2unix fish git gnupg jq moreutils nmon nano sshpass tig tmux ufw vim
 apt install -qq -y python3-distutils
 
-curl -sL https://github.com/mikefarah/yq/releases/download/v4.28.1/yq_linux_amd64 -o /usr/local/bin/yq
+curl -sL https://github.com/mikefarah/yq/releases/download/v4.29.2/yq_linux_amd64 -o /usr/local/bin/yq
 chmod a+x /usr/local/bin/yq
 
 mkdir ~/.ssh
@@ -151,7 +152,7 @@ net.ipv4.tcp_mem = 25600 51200 102400
 net.ipv4.tcp_rmem = 4096 87380 67108864
 net.ipv4.tcp_wmem = 4096 65536 67108864
 net.ipv4.tcp_mtu_probing = 1
-net.ipv4.tcp_congestion_control = hybla
+# net.ipv4.tcp_congestion_control = hybla
 EOF
 ```
 
@@ -281,7 +282,7 @@ fi
 ### Install some tools with pip
 
 ```bash
-pip install --user --upgrade docker-compose httpie ipython yq
+pip install --user --upgrade docker-compose httpie ipythonsudo
 ```
 
 ## Reference

@@ -28,7 +28,7 @@
     },
     {
       "mux": {
-        "enabled": false,
+        "enabled": true,
         "concurrency": 4
       },
       "protocol": "vmess",
