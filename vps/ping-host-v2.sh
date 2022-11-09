@@ -33,7 +33,7 @@ while getopts ":hc:d:" opt; do
 done
 shift $((OPTIND - 1))
 
-_tmp_file=$(mktemp)
+_tmp_file=$(mktemp -d)
 declare -r _tmp_file
 #shellcheck disable=SC2064
 trap \
@@ -48,4 +48,4 @@ loss=$(grep "packets transmitted" "${FILENAME}" | cut -d, -f3 | cut -d% -f1 | tr
 min=$(grep "round-trip min/avg/max" "${FILENAME}" | cut -d= -f2 | cut -d" " -f2 | cut -d/ -f1)
 avg=$(grep "round-trip min/avg/max" "${FILENAME}" | cut -d= -f2 | cut -d" " -f2 | cut -d/ -f2)
 max=$(grep "round-trip min/avg/max" "${FILENAME}" | cut -d= -f2 | cut -d" " -f2 | cut -d/ -f3)
-printf "%s,%d,%.3f,%.3f,%.3f\n" "${dt}" "${loss}" "${avg}" "${min}" "${max}" | tee -a "${DEST}/${1}.txt"
+printf "%s,%d,%.1f,%.1f,%.1f\n" "${dt}" "${loss}" "${avg}" "${min}" "${max}" | tee -a "${DEST}/${1}.txt"
