@@ -6,6 +6,11 @@ timedatectl set-timezone UTC
 # Make sudo work without warning
 echo $(hostname -I) $(hostname)  | tee -a /etc/hosts
 
+swapoff -a
+sed -i 's|^/swapfile|# /swapfile|' /etc/fstab
+sed -i 's|^/swap.img|# /swap.img|' /etc/fstab
+rm -f /swapfile /swap.img
+
 export APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=yes
 export DEBIAN_FRONTEND=noninteractive
 
@@ -282,7 +287,7 @@ fi
 ### Install some tools with pip
 
 ```bash
-pip install --user --upgrade docker-compose httpie ipythonsudo
+pip install --user --upgrade docker-compose httpie ipython
 ```
 
 ## Reference
