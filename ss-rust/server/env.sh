@@ -17,12 +17,12 @@ if [[ ! -f "${_THIS_DIR}/docker-compose.yaml" ]]; then
     fi
 fi
 
-if [[ ! -f "${_THIS_DIR}/ssserver-rust.json" ]]; then
-    jq --arg value "${SHADOWSOCKS[SHADOWSOCKS_PASSWORD]}" '.password=$value' "${_THIS_DIR}/ssserver-rust.tpl.json" >"${_THIS_DIR}/ssserver-rust.json"
+if [[ ! -f "${_THIS_DIR}/ss-server.json" ]]; then
+    jq --arg value "${SHADOWSOCKS[SHADOWSOCKS_PASSWORD]}" '.password=$value' "${_THIS_DIR}/ssserver-rust.tpl.json" >"${_THIS_DIR}/ss-server.json"
     if [[ -n ${SHADOWSOCKS[SIP003_PLUGIN]} ]]; then
-        jq --arg value "${SHADOWSOCKS[SIP003_PLUGIN]}" '. + {plugin: $value}' "${_THIS_DIR}/ssserver-rust.json" |
+        jq --arg value "${SHADOWSOCKS[SIP003_PLUGIN]}" '. + {plugin: $value}' "${_THIS_DIR}/ss-server.json" |
             jq --arg value "server${SHADOWSOCKS[SIP003_PLUGIN_OPTS]:+;${SHADOWSOCKS[SIP003_PLUGIN_OPTS]}}" '. + {plugin_opts: $value}' |
-            jq -S . | sponge "${_THIS_DIR}/ssserver-rust.json"
+            jq -S . | sponge "${_THIS_DIR}/ss-server.json"
     fi
 fi
 

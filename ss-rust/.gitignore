@@ -5,4 +5,4 @@ kcp/docker-compose.yaml
 kcp/kcptun-client.json
 kcp/ss-local.json
 server/docker-compose.yaml
-server/ssserver-rust.json
+server/ss-server.json

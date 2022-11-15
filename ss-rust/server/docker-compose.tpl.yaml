@@ -16,4 +16,4 @@ services:
       - "${SHADOWSOCKS_PORT}:8388/udp"
     restart: always
     volumes:
-      - "./ssserver-rust.json:/etc/shadowsocks-rust/config.json"
+      - "./ss-server.json:/etc/shadowsocks-rust/config.json"
