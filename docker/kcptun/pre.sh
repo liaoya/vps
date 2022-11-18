@@ -5,7 +5,7 @@ _this_dir=$(dirname "${_this_dir}")
 
 export ALPINE_BASE=${ALPINE_IMAGE:-docker.io/library/alpine:3.16.2}
 
-check_command jq upx
+check_command jq
 
 if [[ ! -f "${_this_dir}/client_linux_amd64" || ! -f "${_this_dir}/server_linux_amd64" ]]; then
     KCPTUN_VERSION=${KCPTUN_VERSION:-$(curl -sL https://api.github.com/repos/xtaci/kcptun/releases/latest | jq -r .tag_name)}
@@ -17,7 +17,6 @@ else
     KCPTUN_VERSION=$("${_this_dir}/client_linux_amd64" -v | cut -d" " -f3)
     KCPTUN_VERSION="v${KCPTUN_VERSION}"
 fi
-upx "${_this_dir}/client_linux_amd64" "${_this_dir}/server_linux_amd64" || true
 export KCPTUN_VERSION
 
 _image_prefix=${DOCKER_HUB_PREFIX:-docker.io/yaekee}
