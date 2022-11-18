@@ -18,3 +18,8 @@ sudo ufw status numbered
 # delete a rule
 sudo ufw delete 4
 ```
+
+```bash
+# https://www.baeldung.com/linux/udp-port-testing
+nc -vz -u 155.94.149.79 24222
+```
