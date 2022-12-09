@@ -58,7 +58,7 @@ if [[ -z ${V2RAY[V2RAY_VERSION]} ]]; then
     V2RAY[V2RAY_VERSION]="${V2RAY_VERSION}"
 fi
 
-_check_param MKCP_PORT MKCP_SEED MKCP_UUID PORT UUID V2RAY_VERSION
+_check_param MKCP_PORT MKCP_SEED MKCP_UUID PORT SERVER UUID V2RAY_VERSION
 
 [[ -n "${tracestate}" ]] && eval "${tracestate}"
 
