@@ -33,7 +33,8 @@ _read_param alterid $((RANDOM % 50 + 50))
 _read_param port $((RANDOM % 10000 + 20000))
 _read_param uuid "$(cat /proc/sys/kernel/random/uuid)"
 _read_param mux_concurrency 4
-_read_param server "$(hostname -I | cut -d' ' -f1)"
+#_read_param server "$(hostname -I | cut -d' ' -f1)"
+_read_param server "curl -sL https://httpbin.org/get | jq -r .origin"
 _read_param v2ray_version
 
 _read_param mkcp_alterid $((RANDOM % 50 + 50))
