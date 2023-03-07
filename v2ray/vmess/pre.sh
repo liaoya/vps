@@ -1,4 +1,5 @@
 #!/bin/bash
+#shellcheck disable=SC2312
 
 function _check_param() {
     while (($#)); do
@@ -14,16 +15,17 @@ function _read_param() {
     local _lower _upper
     _lower=${1,,}
     _upper=${1^^}
+    #shellcheck disable=SC2154
     if [[ -f "${EVNFILE}" ]]; then
-        V2RAY[${_upper}]=$(grep -i "^${_lower}=" "${EVNFILE}" | cut -d'=' -f2-)
+        V2RAY["${_upper}"]=$(grep -i "^${_lower}=" "${EVNFILE}" | cut -d'=' -f2-)
     fi
     if [[ -n ${!_upper} ]]; then
-        V2RAY[${_upper}]=${V2RAY[${_upper}]:-${!_upper}}
+        V2RAY["${_upper}"]=${V2RAY["${_upper}"]:-${!_upper}}
     fi
     if [[ $# -gt 1 ]]; then
-        V2RAY[${_upper}]=${V2RAY[${_upper}]:-${2}}
+        V2RAY["${_upper}"]=${V2RAY["${_upper}"]:-${2}}
     fi
-    V2RAY[${_upper}]=${V2RAY[${_upper}]:-""}
+    V2RAY["${_upper}"]=${V2RAY["${_upper}"]:-""}
 }
 
 tracestate=$(shopt -po xtrace) || true
@@ -33,7 +35,8 @@ _read_param alterid $((RANDOM % 50 + 50))
 _read_param port $((RANDOM % 10000 + 20000))
 _read_param uuid "$(cat /proc/sys/kernel/random/uuid)"
 _read_param mux_concurrency 4
-_read_param server "$(hostname -I | cut -d' ' -f1)"
+#_read_param server "$(hostname -I | cut -d' ' -f1)"
+_read_param server "$(curl -sL https://httpbin.org/get | jq -r .origin)"
 _read_param v2ray_version
 
 _read_param mkcp_alterid $((RANDOM % 50 + 50))
@@ -48,7 +51,7 @@ _read_param mkcp_server_up_capacity 200
 _read_param mkcp_uuid "$(cat /proc/sys/kernel/random/uuid)"
 
 {
-    for key in "${!V2RAY[@]}"; do echo "$key => ${V2RAY[$key]}"; done
+    for key in "${!V2RAY[@]}"; do echo "${key} => ${V2RAY[${key}]}"; done
 } | sort
 
 if [[ -z ${V2RAY[V2RAY_VERSION]} ]]; then
@@ -57,7 +60,7 @@ if [[ -z ${V2RAY[V2RAY_VERSION]} ]]; then
     V2RAY[V2RAY_VERSION]="${V2RAY_VERSION}"
 fi
 
-_check_param MKCP_PORT MKCP_SEED MKCP_UUID PORT UUID V2RAY_VERSION
+_check_param MKCP_PORT MKCP_SEED MKCP_UUID PORT SERVER UUID V2RAY_VERSION
 
 [[ -n "${tracestate}" ]] && eval "${tracestate}"
 

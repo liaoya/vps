@@ -1,4 +1,5 @@
 #!/bin/bash
+#shellcheck disable=SC2312
 
 function _check_param() {
     while (($#)); do
@@ -14,16 +15,17 @@ function _read_param() {
     local _lower _upper
     _lower=${1,,}
     _upper=${1^^}
+    #shellcheck disable=SC2154
     if [[ -f "${EVNFILE}" ]]; then
-        SHADOWSOCKS[${_upper}]=$(grep -i "^${_lower}=" "${EVNFILE}" | cut -d'=' -f2-)
+        SHADOWSOCKS["${_upper}"]=$(grep -i "^${_lower}=" "${EVNFILE}" | cut -d'=' -f2-)
     fi
     if [[ -n ${!_upper} ]]; then
-        SHADOWSOCKS[${_upper}]=${SHADOWSOCKS[${_upper}]:-${!_upper}}
+        SHADOWSOCKS["${_upper}"]=${SHADOWSOCKS["${_upper}"]:-${!_upper}}
     fi
     if [[ $# -gt 1 ]]; then
-        SHADOWSOCKS[${_upper}]=${SHADOWSOCKS[${_upper}]:-${2}}
+        SHADOWSOCKS["${_upper}"]=${SHADOWSOCKS["${_upper}"]:-${2}}
     fi
-    SHADOWSOCKS[${_upper}]=${SHADOWSOCKS[${_upper}]:-""}
+    SHADOWSOCKS["${_upper}"]=${SHADOWSOCKS["${_upper}"]:-""}
 }
 
 tracestate=$(shopt -po xtrace) || true
@@ -34,7 +36,8 @@ _read_param kcptun_version
 _read_param shadowsocks_password "$(tr -cd '[:alnum:]' </dev/urandom | fold -w30 | head -n1)"
 _read_param shadowsocks_port $((RANDOM % 10000 + 20000))
 _read_param shadowsocks_rust_version
-_read_param shadowsocks_server "$(hostname -I | cut -d' ' -f1)"
+#_read_param shadowsocks_server "$(hostname -I | cut -d' ' -f1)"
+_read_param shadowsocks_server "$(curl -sL https://httpbin.org/get | jq -r .origin)"
 _read_param sip003_plugin_opts ""
 _read_param sip003_plugin ""
 _read_param v2ray_plugin_version
@@ -62,14 +65,15 @@ if [[ -z ${SHADOWSOCKS[XRAY_PLUGIN_VERSION]} ]]; then
 fi
 
 {
-    for key in "${!SHADOWSOCKS[@]}"; do echo "$key => ${SHADOWSOCKS[$key]}"; done
+    for key in "${!SHADOWSOCKS[@]}"; do echo "${key} => ${SHADOWSOCKS[${key}]}"; done
 } | sort
 
-_check_param KCPTUN_PORT KCPTUN_VERSION SHADOWSOCKS_PASSWORD SHADOWSOCKS_PORT SHADOWSOCKS_RUST_VERSION XRAY_PLUGIN_VERSION
+_check_param KCPTUN_PORT KCPTUN_VERSION SHADOWSOCKS_PASSWORD SHADOWSOCKS_PORT SHADOWSOCKS_RUST_VERSION SHADOWSOCKS_SERVER XRAY_PLUGIN_VERSION
 
 [[ -n "${tracestate}" ]] && eval "${tracestate}"
 
 if [[ -n ${SHADOWSOCKS[SIP003_PLUGIN]} ]]; then
+    #shellcheck disable=SC2154
     if [[ ${SHADOWSOCKS[SIP003_PLUGIN]} == xray-plugin ]] && [[ ! -x "${ROOT_DIR}/xray-plugin_linux_amd64" ]]; then
         curl -sL -o - "https://github.com/teddysun/xray-plugin/releases/download/${SHADOWSOCKS[XRAY_PLUGIN_VERSION]}/xray-plugin-linux-amd64-${SHADOWSOCKS[XRAY_PLUGIN_VERSION]}.tar.gz" | tar -C "${ROOT_DIR}" -I gzip -xf -
         chmod a+x "${ROOT_DIR}/xray-plugin_linux_amd64"

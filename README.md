@@ -23,3 +23,9 @@ sudo ufw delete 4
 # https://www.baeldung.com/linux/udp-port-testing
 nc -vz -u 155.94.149.79 24222
 ```
+
+```bash
+cat ~/Documents/vps/ss-rust/.options
+
+cat ~/Documents/vps/v2ray/vmess/.options
+```
