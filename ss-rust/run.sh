@@ -17,7 +17,7 @@ function _check_command() {
     done
 }
 
-function _add_ufw_port() {
+function _add_firewall_port() {
     while (($#)); do
         if ! sudo ufw status numbered | sed '1,4d' | sed -s 's/\[ /\[/g' | tr -d '[]' | cut -d' ' -f2 | grep -s -q -w "${1}"; then
             sudo ufw allow "${1}"
@@ -26,7 +26,7 @@ function _add_ufw_port() {
     done
 }
 
-function _delete_ufw_port() {
+function _delete_firewall_port() {
     while (($#)); do
         while IFS= read -r num; do
             echo "y" | sudo ufw delete "${num}"
@@ -119,16 +119,16 @@ if [[ ${1} == clean ]]; then
             bash "${_dir}clean.sh"
         fi
     done < <(ls -1d ${ROOT_DIR}/*/)
-    _delete_ufw_port "${SHADOWSOCKS[KCPTUN_PORT]}" "${SHADOWSOCKS[SHADOWSOCKS_PORT]}"
+    _delete_firewall_port "${SHADOWSOCKS[KCPTUN_PORT]}" "${SHADOWSOCKS[SHADOWSOCKS_PORT]}"
 elif [[ ${1} == restart ]]; then
     docker-compose -f "${ROOT_DIR}/${2}/docker-compose.yaml" restart
     if [[ ${2} == server ]]; then
-        _add_ufw_port "${SHADOWSOCKS[KCPTUN_PORT]}" "${SHADOWSOCKS[SHADOWSOCKS_PORT]}"
+        _add_firewall_port "${SHADOWSOCKS[KCPTUN_PORT]}" "${SHADOWSOCKS[SHADOWSOCKS_PORT]}"
     fi
 elif [[ ${1} == start ]]; then
     docker-compose -f "${ROOT_DIR}/${2}/docker-compose.yaml" up -d
     if [[ ${2} == server ]]; then
-        _add_ufw_port "${SHADOWSOCKS[KCPTUN_PORT]}" "${SHADOWSOCKS[SHADOWSOCKS_PORT]}"
+        _add_firewall_port "${SHADOWSOCKS[KCPTUN_PORT]}" "${SHADOWSOCKS[SHADOWSOCKS_PORT]}"
     fi
 elif [[ ${1} == stop ]]; then
     docker-compose -f "${ROOT_DIR}/${2}/docker-compose.yaml" stop

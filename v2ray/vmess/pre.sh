@@ -56,7 +56,7 @@ _read_param mkcp_uuid "$(cat /proc/sys/kernel/random/uuid)"
 
 if [[ -z ${V2RAY[V2RAY_VERSION]} ]]; then
     V2RAY_VERSION=${V2RAY_VERSION:-$(curl -s "https://api.github.com/repos/v2fly/v2ray-core/tags" | jq -r '.[0].name')}
-    V2RAY_VERSION=${V2RAY_VERSION:-v5.1.0}
+    V2RAY_VERSION=${V2RAY_VERSION:-v5.4.1}
     V2RAY[V2RAY_VERSION]="${V2RAY_VERSION}"
 fi
 

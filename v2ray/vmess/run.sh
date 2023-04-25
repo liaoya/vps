@@ -21,20 +21,24 @@ Usage: $(basename "${BASH_SOURCE[0]}") OPTIONS <clean|restart|start|stop> <${_ca
 EOF
 }
 
-function _add_ufw_port() {
+function _add_firewall_port() {
     while (($#)); do
-        if ! sudo ufw status numbered | sed '1,4d' | sed -s 's/\[ /\[/g' | tr -d '[]' | cut -d' ' -f2 | grep -s -q -w "${1}"; then
-            sudo ufw allow "${1}"
+        if command -v ufw 1>/dev/null 2>&1; then
+            if ! sudo ufw status numbered | sed '1,4d' | sed -s 's/\[ /\[/g' | tr -d '[]' | cut -d' ' -f2 | grep -s -q -w "${1}"; then
+                sudo ufw allow "${1}"
+            fi
         fi
         shift
     done
 }
 
-function _delete_ufw_port() {
+function _delete_firewall_port() {
     while (($#)); do
-        while IFS= read -r num; do
-            echo "y" | sudo ufw delete "${num}"
-        done < <(sudo ufw status numbered | sed '1,4d' | sed -s 's/\[ /\[/g' | tr -d '[]' | cut -d' ' -f1,2 | grep -w "${1}" | tac | cut -d' ' -f1)
+        if command -v ufw 1>/dev/null 2>&1; then
+            while IFS= read -r num; do
+                echo "y" | sudo ufw delete "${num}"
+            done < <(sudo ufw status numbered | sed '1,4d' | sed -s 's/\[ /\[/g' | tr -d '[]' | cut -d' ' -f1,2 | grep -w "${1}" | tac | cut -d' ' -f1)
+        fi
         shift
     done
 }
@@ -99,16 +103,16 @@ if [[ ${1} == clean ]]; then
             bash "${_dir}clean.sh"
         fi
     done < <(ls -1d ${ROOT_DIR}/*/)
-    _delete_ufw_port "${V2RAY[PORT]}" "${V2RAY[MKCP_PORT]}"
+    _delete_firewall_port "${V2RAY[PORT]}" "${V2RAY[MKCP_PORT]}"
 elif [[ ${1} == restart ]]; then
     docker-compose -f "${ROOT_DIR}/${2}/docker-compose.yaml" restart
     if [[ ${2} == server ]]; then
-        _add_ufw_port "${V2RAY[PORT]}" "${V2RAY[MKCP_PORT]}"
+        _add_firewall_port "${V2RAY[PORT]}" "${V2RAY[MKCP_PORT]}"
     fi
 elif [[ ${1} == start ]]; then
     docker-compose -f "${ROOT_DIR}/${2}/docker-compose.yaml" up -d
     if [[ ${2} == server ]]; then
-        _add_ufw_port "${V2RAY[PORT]}" "${V2RAY[MKCP_PORT]}"
+        _add_firewall_port "${V2RAY[PORT]}" "${V2RAY[MKCP_PORT]}"
     fi
 elif [[ ${1} == stop ]]; then
     docker-compose -f "${ROOT_DIR}/${2}/docker-compose.yaml" stop
