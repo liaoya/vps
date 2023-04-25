@@ -1,4 +1,5 @@
 #!/bin/bash
+#shellcheck disable=SC2312
 
 _THIS_DIR=$(readlink -f "${BASH_SOURCE[0]}")
 _THIS_DIR=$(dirname "${_THIS_DIR}")
