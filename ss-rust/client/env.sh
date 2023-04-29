@@ -23,6 +23,7 @@ fi
 if [[ ! -f "${_THIS_DIR}/ss-local.json" ]]; then
     jq . "${_THIS_DIR}/ss-local-tpl.json" |
         jq --arg value "${SHADOWSOCKS[SHADOWSOCKS_SERVER]}" '.servers[0].address=$value' |
+        jq --arg value "${SHADOWSOCKS[SHADOWSOCKS_METHOD]}" '.servers[0].method=$value' |
         jq --arg value "${SHADOWSOCKS[SHADOWSOCKS_PASSWORD]}" '.servers[0].password=$value' |
         jq ".servers[0].port=${SHADOWSOCKS[SHADOWSOCKS_PORT]}" |
         jq -S . >"${_THIS_DIR}/ss-local.json"

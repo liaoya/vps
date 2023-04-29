@@ -33,10 +33,10 @@ set +x
 
 _read_param kcptun_port $((RANDOM % 10000 + 20000))
 _read_param kcptun_version
+_read_param shadowsocks_method 2022-blake3-aes-256-gcm
 _read_param shadowsocks_password "$(tr -cd '[:alnum:]' </dev/urandom | fold -w30 | head -n1)"
 _read_param shadowsocks_port $((RANDOM % 10000 + 20000))
 _read_param shadowsocks_rust_version
-#_read_param shadowsocks_server "$(hostname -I | cut -d' ' -f1)"
 _read_param shadowsocks_server "$(curl -sL https://httpbin.org/get | jq -r .origin)"
 _read_param sip003_plugin_opts ""
 _read_param sip003_plugin ""
@@ -45,12 +45,12 @@ _read_param xray_plugin_version
 
 if [[ -z ${SHADOWSOCKS[KCPTUN_VERSION]} ]]; then
     KCPTUN_VERSION=${KCPTUN_VERSION:-$(curl -s "https://api.github.com/repos/xtaci/kcptun/tags" | jq -r '.[0].name')}
-    KCPTUN_VERSION=${KCPTUN_VERSION:-v20221015}
+    KCPTUN_VERSION=${KCPTUN_VERSION:-v20230214}
     SHADOWSOCKS[KCPTUN_VERSION]="${KCPTUN_VERSION}"
 fi
 if [[ -z ${SHADOWSOCKS[SHADOWSOCKS_RUST_VERSION]} ]]; then
     SHADOWSOCKS_RUST_VERSION=${SHADOWSOCKS_RUST_VERSION:-$(curl -sL "https://api.github.com/repos/shadowsocks/shadowsocks-rust/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')}
-    SHADOWSOCKS_RUST_VERSION=${SHADOWSOCKS_RUST_VERSION:-v1.14.3}
+    SHADOWSOCKS_RUST_VERSION=${SHADOWSOCKS_RUST_VERSION:v1.15.3}
     SHADOWSOCKS[SHADOWSOCKS_RUST_VERSION]="${SHADOWSOCKS_RUST_VERSION}"
 fi
 if [[ -z ${SHADOWSOCKS[V2RAY_PLUGIN_VERSION]} ]]; then
