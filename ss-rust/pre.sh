@@ -50,7 +50,7 @@ if [[ -z ${SHADOWSOCKS[KCPTUN_VERSION]} ]]; then
 fi
 if [[ -z ${SHADOWSOCKS[SHADOWSOCKS_RUST_VERSION]} ]]; then
     SHADOWSOCKS_RUST_VERSION=${SHADOWSOCKS_RUST_VERSION:-$(curl -sL "https://api.github.com/repos/shadowsocks/shadowsocks-rust/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')}
-    SHADOWSOCKS_RUST_VERSION=${SHADOWSOCKS_RUST_VERSION:v1.15.3}
+    SHADOWSOCKS_RUST_VERSION=${SHADOWSOCKS_RUST_VERSION:-v1.15.3}
     SHADOWSOCKS[SHADOWSOCKS_RUST_VERSION]="${SHADOWSOCKS_RUST_VERSION}"
 fi
 if [[ -z ${SHADOWSOCKS[V2RAY_PLUGIN_VERSION]} ]]; then
