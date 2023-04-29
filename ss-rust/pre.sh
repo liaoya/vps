@@ -34,7 +34,7 @@ set +x
 _read_param kcptun_port $((RANDOM % 10000 + 20000))
 _read_param kcptun_version
 _read_param shadowsocks_method 2022-blake3-aes-256-gcm
-_read_param shadowsocks_password "$(tr -cd '[:alnum:]' </dev/urandom | fold -w30 | head -n1)"
+_read_param shadowsocks_password "$(tr -cd '[:alnum:]' </dev/urandom | fold -w31 | head -n1)"
 _read_param shadowsocks_port $((RANDOM % 10000 + 20000))
 _read_param shadowsocks_rust_version
 _read_param shadowsocks_server "$(curl -sL https://httpbin.org/get | jq -r .origin)"
@@ -60,7 +60,7 @@ if [[ -z ${SHADOWSOCKS[V2RAY_PLUGIN_VERSION]} ]]; then
 fi
 if [[ -z ${SHADOWSOCKS[XRAY_PLUGIN_VERSION]} ]]; then
     XRAY_PLUGIN_VERSION=${XRAY_PLUGIN_VERSION:-$(curl -s "https://api.github.com/repos/teddysun/xray-plugin/tags" | jq -r '.[0].name')}
-    XRAY_PLUGIN_VERSION=${XRAY_PLUGIN_VERSION:-v1.6.0}
+    XRAY_PLUGIN_VERSION=${XRAY_PLUGIN_VERSION:-v1.8.1}
     SHADOWSOCKS[XRAY_PLUGIN_VERSION]="${XRAY_PLUGIN_VERSION}"
 fi
 
@@ -82,6 +82,13 @@ if [[ -n ${SHADOWSOCKS[SIP003_PLUGIN]} ]]; then
         curl -sL -o - "https://github.com/shadowsocks/v2ray-plugin/releases/download/${SHADOWSOCKS[V2RAY_PLUGIN_VERSION]}/v2ray-plugin-linux-amd64-${SHADOWSOCKS[V2RAY_PLUGIN_VERSION]}.tar.gz" | tar -C "${ROOT_DIR}" -I gzip -xf -
         chmod a+x "${ROOT_DIR}/v2ray-plugin_linux_amd64"
         sudo chown "$(id -un):$(id -gn)" "${ROOT_DIR}/v2ray-plugin_linux_amd64"
+    fi
+fi
+
+if [[ ${SHADOWSOCKS[SHADOWSOCKS_METHOD]} == 2022-blake3* ]]; then
+    if [[ ${#SHADOWSOCKS[SHADOWSOCKS_PASSWORD]} -ne 31 ]]; then
+        echo "The password lenght must be 32 when using 2022-blake3"
+        exit 1
     fi
 fi
 
