@@ -11,8 +11,6 @@ The script demand the following tools
 Run `bash run.sh start server` to start a new or existing docker. It will create a `.options` file (Some values are removed).
 
 ```
-alterid=51
-mkcp_alterid=82
 mkcp_client_down_capacity=200
 mkcp_client_up_capacity=50
 mkcp_header_type=dtls

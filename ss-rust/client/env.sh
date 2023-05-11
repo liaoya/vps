@@ -28,6 +28,7 @@ if [[ ! -f "${_THIS_DIR}/ss-local.json" ]]; then
         jq ".servers[0].port=${SHADOWSOCKS[SHADOWSOCKS_PORT]}" |
         jq -S . >"${_THIS_DIR}/ss-local.json"
     if [[ ${SHADOWSOCKS[SHADOWSOCKS_METHOD]} == 2022-blake3* ]]; then
+        #shellcheck disable=SC2086
         jq . "${_THIS_DIR}/ss-local.json" |
             jq --arg value "$(echo ${SHADOWSOCKS[SHADOWSOCKS_PASSWORD]} | base64)" '.servers[0].password=$value' |
             jq -S . |
