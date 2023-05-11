@@ -1,0 +1,12 @@
+---
+version: "3"
+
+services:
+  xray:
+    image: docker.io/teddysun/xray:${XRAY[XRAY_VERSION]:1}
+    ports:
+      - "${XRAY[SHADOWSOCKS_PORT]}:8388/udp"
+      - "${XRAY[VMESS_PORT]}:37192/udp"
+    restart: always
+    volumes:
+      - "./config.json:/etc/xray/config.json"

@@ -29,3 +29,5 @@ cat ~/Documents/vps/ss-rust/.options
 
 cat ~/Documents/vps/v2ray/vmess/.options
 ```
+
+- <https://really-simple-ssl.com/mozilla_pkix_error_required_tls_feature_missing/>： `MOZILLA_PKIX_ERROR_REQUIRED_TLS_FEATURE_MISSING`

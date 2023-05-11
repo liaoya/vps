@@ -1,0 +1,12 @@
+---
+version: "3"
+
+services:
+  xray:
+    image: docker.io/teddysun/xray:${XRAY[XRAY_VERSION]:1}
+    ports:
+      - 1080:1080
+      - 1081:1081
+    restart: always
+    volumes:
+      - "./config.json:/etc/xray/config.json"
