@@ -19,10 +19,11 @@ fi
 
 if [[ ! -f "${_THIS_DIR}/ss-server.json" ]]; then
     jq . "${_THIS_DIR}/ssserver-rust.tpl.json" |
-        jq --arg value "${SHADOWSOCKS[SHADOWSOCKS_METHOD]}" '.method=$value'  |
+        jq --arg value "${SHADOWSOCKS[SHADOWSOCKS_METHOD]}" '.method=$value' |
         jq --arg value "${SHADOWSOCKS[SHADOWSOCKS_PASSWORD]}" '.password=$value' |
         jq -S . >"${_THIS_DIR}/ss-server.json"
     if [[ ${SHADOWSOCKS[SHADOWSOCKS_METHOD]} == 2022-blake3* ]]; then
+        #shellcheck disable=SC2086
         jq . "${_THIS_DIR}/ss-server.json" |
             jq --arg value "$(echo ${SHADOWSOCKS[SHADOWSOCKS_PASSWORD]} | base64)" '.password=$value' |
             jq -S . |
