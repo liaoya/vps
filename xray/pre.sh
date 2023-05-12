@@ -31,13 +31,16 @@ function _read_param() {
 tracestate=$(shopt -po xtrace) || true
 set +x
 
-_read_param xray_version
+_read_param mode
+_read_param port $((RANDOM % 10000 + 20000))
 _read_param protocol
+_read_param transport
+_read_param version
 
 if [[ ${PROTOCOL} == shadowsocks ]]; then
     _read_param shadowsocks_method "2022-blake3-aes-256-gcm"
+    _read_param shadowsocks_network "tcp,udp"
     _read_param shadowsocks_password "$(tr -cd '[:alnum:]' </dev/urandom | fold -w30 | head -n1)"
-    _read_param shadowsocks_port $((RANDOM % 10000 + 20000))
 fi
 
 if [[ ${PROTOCOL} == vmess ]]; then
@@ -47,16 +50,29 @@ if [[ ${PROTOCOL} == vmess ]]; then
     _read_param mkcp_seed "$(tr -cd '[:alnum:]' </dev/urandom | fold -w15 | head -n1)"
 fi
 
+if [[ ${TRANSPORT} == kcp ]]; then
+    _read_param kcp_client_down_capacity 200
+    _read_param kcp_client_up_capacity 50
+    _read_param kcp_header_type dtls
+    _read_param kcp_server_down_capacity 200
+    _read_param kcp_server_up_capacity 200
+    if [[ ${PROTOCOL} != shadowsocks ]]; then
+        _read_param kcp_seed "$(tr -cd '[:alnum:]' </dev/urandom | fold -w15 | head -n1)"
+    fi
+fi
+
+if [[ -z ${XRAY[VERSION]} ]]; then
+    VERSION=${VERSION:-$(curl -s https://api.github.com/repos/xtls/xray-core/releases/latest | jq -r .tag_name)}
+    VERSION=${VERSION:-v1.7.5}
+    XRAY[VERSION]="${VERSION}"
+fi
+
 {
     for key in "${!XRAY[@]}"; do echo "${key} => ${XRAY[${key}]}"; done
 } | sort
 
-if [[ -z ${XRAY[XRAY_VERSION]} ]]; then
-    XRAY_VERSION=${XRAY_VERSION:-$(curl -s https://api.github.com/repos/xtls/xray-core/releases/latest | jq -r .tag_name)}
-    XRAY_VERSION=${XRAY_VERSION:-v1.7.5}
-    XRAY[XRAY_VERSION]="${XRAY_VERSION}"
-fi
-
-_check_param XRAY_VERSION PROTOCOL
+_check_param MODE PORT PROTOCOL VERSION
+export XRAY_PORT=${XRAY[PORT]}
+export XRAY_VERSION=${XRAY[VERSION]:1}
 
 [[ -n "${tracestate}" ]] && eval "${tracestate}"

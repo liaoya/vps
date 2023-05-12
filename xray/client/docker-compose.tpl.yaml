@@ -3,7 +3,7 @@ version: "3"
 
 services:
   xray:
-    image: docker.io/teddysun/xray:${XRAY[XRAY_VERSION]:1}
+    image: docker.io/teddysun/xray:${XRAY[VERSION]:1}
     ports:
       - 1080:1080
       - 1081:1081
