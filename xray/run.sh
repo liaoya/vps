@@ -18,9 +18,13 @@ Usage: $(basename "${BASH_SOURCE[0]}") OPTIONS <clean|restart|start|stop> <${_ca
     -h, show the help
     -v, verbose mode
     -f EVNFILE, The environment file. ${EVNFILE:+the default is ${EVNFILE}}
+    -m MODE, server or client. ${MODE:+the default is ${MODE}}
+    -p PROTOCOL, xray protocol, either of shadowsocks, vmess
+    -s STREAM, xray stream, either of empty, kcp
 Example:
     $(basename "${BASH_SOURCE[0]}") clean
-    $(basename "${BASH_SOURCE[0]}") start server shadowsocks kcp
+    $(basename "${BASH_SOURCE[0]}") -m server -p shadowsocks start
+    $(basename "${BASH_SOURCE[0]}") -m server -p shadowsocks -s kcp start
     $(basename "${BASH_SOURCE[0]}") restart
     $(basename "${BASH_SOURCE[0]}") stop
 EOF
@@ -52,8 +56,11 @@ declare -A XRAY
 export XRAY
 
 EVNFILE=${EVNFILE:-"${ROOT_DIR}/.options"}
+MODE=${MODE:-}
+PROTOCOL=${PROTOCOL:-}
+STREAM=${STREAM:-}
 
-while getopts ":hvf:" opt; do
+while getopts ":hvf:m:p:s:" opt; do
     case $opt in
     h)
         print_usage
@@ -65,6 +72,15 @@ while getopts ":hvf:" opt; do
         ;;
     f)
         EVNFILE=$(readlink -f "${OPTARG}")
+        ;;
+    m)
+        MODE=${OPTARG}
+        ;;
+    p)
+        PROTOCOL=${OPTARG}
+        ;;
+    s)
+        STREAM=${OPTARG}
         ;;
     \?)
         print_usage
@@ -79,46 +95,31 @@ if [[ $# -eq 0 ]]; then
     exit 1
 fi
 OPERATION=$1
-shift
-if [[ ${OPERATION} == start ]]; then
-    if [[ $# -lt 2 ]]; then
-        echo "At lease two parameter is required for ${OPERATION}"
-        exit 1
+for key in EVNFILE MODE PROTOCOL STREAM; do
+    if [[ -n ${!key} ]]; then
+        export ${key}=${!key}
     fi
+done
 
-    if [[ ! -d "${ROOT_DIR}/${1}" ]]; then
-        print_usage
-        exit 1
-    fi
-    export MODE=${1}
-
-    if [[ ${2} != shadowsocks && ${2} != vmess && ${2} != vless ]]; then
-        print_usage
-        exit 1
-    fi
-    export PROTOCOL=${2}
-
-    TRANSPORT=""
-    if [[ $# -eq 3 && ${3} != kcp && ${3} != quic ]]; then
-        print_usage
-        exit 1
-    else
-        TRANSPORT=${3}
-    fi
-    export TRANSPORT
+if [[ ${OPERATION} == start ]] && [[ -z ${MODE} || -z ${PROTOCOL} ]]; then
+    print_usage
+    exit 1
 fi
 
-if [[ ! -e ${EVNFILE} || -n ${EVNFILE} ]]; then touch "${EVNFILE}"; fi
-export EVNFILE
+if [[ ${OPERATION} != start && ! -e ${EVNFILE} ]]; then
+    echo "${OPERATION} require a env file"
+    exit 1
+fi
 
+if [[ ! -e ${EVNFILE} ]]; then touch "${EVNFILE}"; fi
 if [[ -f "${ROOT_DIR}/pre.sh" ]]; then source "${ROOT_DIR}/pre.sh"; fi
 
-COMPOSE_PROJECT_NAME=$(basename "${ROOT_DIR}")-${XRAY[MODE]}
+COMPOSE_PROJECT_NAME=$(basename "${ROOT_DIR}")-${XRAY[PROTOCOL]}
 export COMPOSE_PROJECT_NAME
-if [[ -f "${ROOT_DIR}/${XRAY[MODE]}/env.sh" ]]; then source "${ROOT_DIR}/${XRAY[MODE]}/env.sh"; fi
 
 if [[ ${OPERATION} == start ]]; then
-    # docker-compose -f "${ROOT_DIR}/${MODE}/docker-compose.yaml" up -d
+    if [[ -f "${ROOT_DIR}/${XRAY[MODE]}/env.sh" ]]; then source "${ROOT_DIR}/${XRAY[MODE]}/env.sh"; fi
+    docker-compose -f "${ROOT_DIR}/${MODE}/docker-compose.yaml" up -d
     if [[ ${MODE} == server ]]; then
         _add_firewall_port "${XRAY[PORT]}"
     fi
@@ -126,11 +127,9 @@ if [[ ${OPERATION} == start ]]; then
     exit 0
 fi
 
-if [[ -n ${XRAY[MODE]} ]]; then
-    if [[ ! -f "${ROOT_DIR}/${XRAY[MODE]}/docker-compose.yaml" ]]; then
-        echo "${ROOT_DIR}/${XRAY[MODE]}/docker-compose.yaml is not generated"
-        exit 1
-    fi
+if [[ ! -f "${ROOT_DIR}/${XRAY[MODE]}/docker-compose.yaml" ]]; then
+    echo "${ROOT_DIR}/${XRAY[MODE]}/docker-compose.yaml does not exist"
+    exit 1
 fi
 
 if [[ ${OPERATION} == clean ]]; then
@@ -151,6 +150,4 @@ elif [[ ${OPERATION} == restart ]]; then
     if [[ ${XRAY[MODE]} == server ]]; then
         _add_firewall_port "${XRAY[PORT]}"
     fi
-else
-    echo "Unknown opereation"
 fi

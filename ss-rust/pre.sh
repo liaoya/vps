@@ -34,7 +34,7 @@ set +x
 _read_param kcptun_port $((RANDOM % 10000 + 20000))
 _read_param kcptun_version
 _read_param shadowsocks_method 2022-blake3-aes-256-gcm
-_read_param shadowsocks_password "$(tr -cd '[:alnum:]' </dev/urandom | fold -w31 | head -n1)"
+_read_param shadowsocks_password "$(tr -cd '[:alnum:]' </dev/urandom | fold -w32 | head -n1)"
 _read_param shadowsocks_port $((RANDOM % 10000 + 20000))
 _read_param shadowsocks_rust_version
 _read_param shadowsocks_server "$(curl -sL https://httpbin.org/get | jq -r .origin)"
@@ -86,7 +86,7 @@ if [[ -n ${SHADOWSOCKS[SIP003_PLUGIN]} ]]; then
 fi
 
 if [[ ${SHADOWSOCKS[SHADOWSOCKS_METHOD]} == 2022-blake3* ]]; then
-    if [[ ${#SHADOWSOCKS[SHADOWSOCKS_PASSWORD]} -ne 31 ]]; then
+    if [[ ${#SHADOWSOCKS[SHADOWSOCKS_PASSWORD]} -ne 32 ]]; then
         echo "The password lenght must be 32 when using 2022-blake3"
         exit 1
     fi

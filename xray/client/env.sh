@@ -4,20 +4,53 @@ _THIS_DIR=$(readlink -f "${BASH_SOURCE[0]}")
 _THIS_DIR=$(dirname "${_THIS_DIR}")
 
 if [[ ! -f "${_THIS_DIR}/docker-compose.yaml" ]]; then
-    envsubst "$(env | sort | sed -e 's/=.*//' -e 's/^/\$/g')" <"${_THIS_DIR}/docker-compose.tpl.yaml" >"${_THIS_DIR}/docker-compose.yaml"
+    cat <<EOF >"${_THIS_DIR}/docker-compose.yaml"
+---
+version: "3"
+
+services:
+  client:
+    image: docker.io/teddysun/xray:${XRAY[VERSION]:1}
+    ports:
+      - 1080:1080
+      - 1081:1081
+    restart: always
+    volumes:
+      - "./config.json:/etc/xray/config.json"
+EOF
 fi
 
 if [[ ! -f "${_THIS_DIR}/config.json" ]]; then
-    #shellcheck disable=SC2002
-    cat "${_THIS_DIR}/server.tpl.json" |
-        jq ".inbounds[0].settings.clients[0].method=\"${XRAY[SHADOWSOCKS_METHOD]}\"" |
-        jq ".inbounds[0].settings.clients[0].password=\"${XRAY[SHADOWSOCKS_PASSWORD]}\"" |
-        jq ".inbounds[1].settings.clients[0].password=\"${XRAY[SHADOWSOCKS_PASSWORD]}\"" |
-        jq ".inbounds[1].streamSettings.kcpSettings.downlinkCapacity=${XRAY[MKCP_SERVER_DOWN_CAPACITY]}" |
-        jq ".inbounds[1].streamSettings.kcpSettings.header.type=\"${XRAY[MKCP_HEADER_TYPE]}\"" |
-        jq ".inbounds[1].streamSettings.kcpSettings.seed=\"${XRAY[MKCP_SEED]}\"" |
-        jq ".inbounds[1].streamSettings.kcpSettings.uplinkCapacity=${XRAY[MKCP_SERVER_UP_CAPACITY]}" |
-        jq -S '.' >"${_THIS_DIR}/config.json"
-fi
+    cp "${_THIS_DIR}/client.tpl.json" "${_THIS_DIR}/config.json"
 
-unset -v _THIS_DIR
+    if [[ ${PROTOCOL} == shadowsocks ]]; then
+        jq . "${_THIS_DIR}/config.json" |
+            jq --arg value "${XRAY[PROTOCOL]}" '.outbounds[2].protocol=$value' |
+            jq --arg value "${XRAY[SERVER]}" '.outbounds[2].settings.servers[0].address=$value' |
+            jq --argjson value "${XRAY[PORT]}" '.outbounds[2].settings.servers[0].port=$value' |
+            jq --arg value "${XRAY[SHADOWSOCKS_METHOD]}" '.outbounds[2].settings.servers[0].method=$value' |
+            jq --arg value "${XRAY[SHADOWSOCKS_PASSWORD]}" '.outbounds[2].settings.servers[0].password=$value' |
+            jq -S . |
+            sponge "${_THIS_DIR}/config.json"
+        if [[ ${XRAY[SHADOWSOCKS_METHOD]} == 2022-blake3* ]]; then
+            #shellcheck disable=SC2086
+            jq . "${_THIS_DIR}/config.json" |
+                jq --arg value "$(echo ${XRAY[SHADOWSOCKS_PASSWORD]} | base64)" '.outbounds[2].settings.servers[0].password=$value' |
+                jq -S . |
+                sponge "${_THIS_DIR}/config.json"
+        fi
+    fi
+
+    if [[ ${STREAM} == kcp ]]; then
+        jq . "${_THIS_DIR}/config.json" |
+            jq --arg value "${XRAY[KCP_HEADER_TYPE]}" '.outbounds[2].streamSettings.kcpSettings.header.type=$value' |
+            jq --arg value "${XRAY[KCP_SEED]}" '.outbounds[2].streamSettings.kcpSettings.seed=$value' |
+            jq --argjson value "${XRAY[KCP_CLIENT_DOWN_CAPACITY]}" '.outbounds[2].streamSettings.kcpSettings.downlinkCapacity=$value' |
+            jq --argjson value "${XRAY[KCP_CLIENT_UP_CAPACITY]}" '.outbounds[2].streamSettings.kcpSettings.uplinkCapacity=$value' |
+            jq '.outbounds[2].streamSettings.kcpSettings.readBufferSize=5' |
+            jq '.outbounds[2].streamSettings.kcpSettings.writeBufferSize=5' |
+            jq '.outbounds[2].streamSettings.network="kcp"' |
+            jq -S . |
+            sponge "${_THIS_DIR}/config.json"
+    fi
+fi

@@ -26,29 +26,7 @@
       "protocol": "blackhole",
       "tag": "block"
     },
-    {
-      "mux": {
-        "enabled": false,
-        "concurrency": 4
-      },
-      "protocol": "vmess",
-      "settings": {
-        "vnext": [
-          {
-            "address": "",
-            "port": 0,
-            "users": [
-              {
-                "alterId": 0,
-                "id": "",
-                "security": "auto"
-              }
-            ]
-          }
-        ]
-      },
-      "tag": "proxy"
-    }
+    {}
   ],
   "routing": {
     "domainStrategy": "IPOnDemand",
