@@ -14,7 +14,7 @@ env SERVER=8.8.8.8 bash run.sh -v -m server -p shadowsocks start
 
 env SERVER=8.8.8.8 bash run.sh -v -m server -p shadowsocks -s kcp start
 
-bash run.sh -v -m client -p shadowsocks start
+bash run.sh -v -m client -p shadowsocks -s kcp start
 ```
 
 ## Reference

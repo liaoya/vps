@@ -16,14 +16,14 @@ function _read_param() {
     _lower=${1,,}
     _upper=${1^^}
     #shellcheck disable=SC2154
-    if [[ $# -gt 1 && -n ${2} ]]; then
-        XRAY["${_upper}"]=${XRAY["${_upper}"]:-${2}}
-    fi
     if [[ -n ${!_upper} ]]; then
         XRAY["${_upper}"]=${XRAY["${_upper}"]:-${!_upper}}
     fi
     if [[ -f "${EVNFILE}" ]]; then
         XRAY["${_upper}"]=${XRAY["${_upper}"]:-$(grep -i "^${_lower}=" "${EVNFILE}" | cut -d'=' -f2-)}
+    fi
+    if [[ $# -gt 1 && -n ${2} ]]; then
+        XRAY["${_upper}"]=${XRAY["${_upper}"]:-${2}}
     fi
     XRAY["${_upper}"]=${XRAY["${_upper}"]:-""}
 }

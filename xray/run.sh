@@ -101,6 +101,13 @@ for key in EVNFILE MODE PROTOCOL STREAM; do
     fi
 done
 
+for cmd in docker docker-compose jq yq; do
+    if ! command -v "${cmd}" 1>/dev/null 2>&1; then
+        echo "${cmd} is required"
+        exit 1
+    fi
+done
+
 if [[ ${OPERATION} == start ]] && [[ -z ${MODE} || -z ${PROTOCOL} ]]; then
     print_usage
     exit 1

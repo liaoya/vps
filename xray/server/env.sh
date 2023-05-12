@@ -38,7 +38,8 @@ if [[ ! -f "${_THIS_DIR}/config.json" ]]; then
 }
 EOF
     if [[ ${PROTOCOL} == shadowsocks ]]; then
-        yq -i '.services.server.ports += "'"${XRAY[PORT]}":8388'"' "${_THIS_DIR}/docker-compose.yaml"
+        yq -i '.services.server.ports += "'"${XRAY[PORT]}":8388'/tcp"' "${_THIS_DIR}/docker-compose.yaml"
+        yq -i '.services.server.ports += "'"${XRAY[PORT]}":8388'/udp"' "${_THIS_DIR}/docker-compose.yaml"
 
         jq . "${_THIS_DIR}/config.json" |
             jq ".inbounds[0].port=8388" |
