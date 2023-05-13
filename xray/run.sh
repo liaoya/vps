@@ -59,6 +59,7 @@ EVNFILE=${EVNFILE:-"${ROOT_DIR}/.options"}
 MODE=${MODE:-}
 PROTOCOL=${PROTOCOL:-}
 STREAM=${STREAM:-}
+VERBOSE=0
 
 while getopts ":hvf:m:p:s:" opt; do
     case $opt in
@@ -67,6 +68,7 @@ while getopts ":hvf:m:p:s:" opt; do
         exit 0
         ;;
     v)
+        export VERBOSE=1
         set -x
         export PS4='+(${BASH_SOURCE[0]}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
         ;;

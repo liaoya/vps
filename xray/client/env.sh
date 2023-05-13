@@ -22,6 +22,9 @@ fi
 
 if [[ ! -f "${_THIS_DIR}/config.json" ]]; then
     cp "${_THIS_DIR}/client.tpl.json" "${_THIS_DIR}/config.json"
+    if [[ ${VERBOSE} ]]; then
+        jq '.log.loglevel="debug"' "${_THIS_DIR}/config.json" | sponge "${_THIS_DIR}/config.json"
+    fi
 
     if [[ ${PROTOCOL} == shadowsocks ]]; then
         jq . "${_THIS_DIR}/config.json" |
@@ -45,11 +48,14 @@ if [[ ! -f "${_THIS_DIR}/config.json" ]]; then
         jq . "${_THIS_DIR}/config.json" |
             jq --arg value "${XRAY[KCP_HEADER_TYPE]}" '.outbounds[2].streamSettings.kcpSettings.header.type=$value' |
             jq --arg value "${XRAY[KCP_SEED]}" '.outbounds[2].streamSettings.kcpSettings.seed=$value' |
-            jq --argjson value "${XRAY[KCP_CLIENT_DOWN_CAPACITY]}" '.outbounds[2].streamSettings.kcpSettings.downlinkCapacity=$value' |
-            jq --argjson value "${XRAY[KCP_CLIENT_UP_CAPACITY]}" '.outbounds[2].streamSettings.kcpSettings.uplinkCapacity=$value' |
-            jq '.outbounds[2].streamSettings.kcpSettings.readBufferSize=5' |
-            jq '.outbounds[2].streamSettings.kcpSettings.writeBufferSize=5' |
+            jq --argjson value "${XRAY[KCP_CONGESTION]}" '.outbounds[2].streamSettings.congestion=$value' |
+            jq --argjson value "${XRAY[KCP_CLIENT_DOWN_CAPACITY]}" '.outbounds[2].streamSettings.downlinkCapacity=$value' |
+            jq --argjson value "${XRAY[KCP_MTU]}" '.outbounds[2].streamSettings.mtu=$value' |
+            jq --argjson value "${XRAY[KCP_CLIENT_UP_CAPACITY]}" '.outbounds[2].streamSettings.uplinkCapacity=$value' |
             jq '.outbounds[2].streamSettings.network="kcp"' |
+            jq '.outbounds[2].streamSettings.readBufferSize=5' |
+            jq '.outbounds[2].streamSettings.tti=30' |
+            jq '.outbounds[2].streamSettings.writeBufferSize=5' |
             jq -S . |
             sponge "${_THIS_DIR}/config.json"
     fi
