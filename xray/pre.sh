@@ -81,7 +81,5 @@ fi
 } | sort
 
 _check_param MODE PORT PROTOCOL SERVER VERSION
-export XRAY_PORT=${XRAY[PORT]}
-export XRAY_VERSION=${XRAY[VERSION]:1}
 
 [[ -n "${tracestate}" ]] && eval "${tracestate}"

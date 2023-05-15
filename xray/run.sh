@@ -123,7 +123,13 @@ fi
 if [[ ! -e ${EVNFILE} ]]; then touch "${EVNFILE}"; fi
 if [[ -f "${ROOT_DIR}/pre.sh" ]]; then source "${ROOT_DIR}/pre.sh"; fi
 
-COMPOSE_PROJECT_NAME=$(basename "${ROOT_DIR}")-${XRAY[PROTOCOL]}
+COMPOSE_PROJECT_NAME=$(basename "${ROOT_DIR}")
+if [[ -n ${XRAY[PROTOCOL]} ]]; then
+    COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}-${XRAY[PROTOCOL]}
+fi
+if [[ -n ${XRAY[STREAM]} ]]; then
+    COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}-${XRAY[STREAM]}
+fi
 export COMPOSE_PROJECT_NAME
 
 if [[ ${OPERATION} == start ]]; then
@@ -134,14 +140,7 @@ if [[ ${OPERATION} == start ]]; then
     fi
     if [[ -f "${ROOT_DIR}/post.sh" && ${OPERATION} == start ]]; then source "${ROOT_DIR}/post.sh"; fi
     exit 0
-fi
-
-if [[ ! -f "${ROOT_DIR}/${XRAY[MODE]}/docker-compose.yaml" ]]; then
-    echo "${ROOT_DIR}/${XRAY[MODE]}/docker-compose.yaml does not exist"
-    exit 1
-fi
-
-if [[ ${OPERATION} == clean ]]; then
+elif [[ ${OPERATION} == clean ]]; then
     while IFS= read -r _container; do
         docker container rm -f -v "${_container}"
     done < <(docker ps -a --format '{{.Names}}' | grep -E "^${COMPOSE_PROJECT_NAME}")
@@ -152,7 +151,15 @@ if [[ ${OPERATION} == clean ]]; then
         fi
     done < <(ls -1d ${ROOT_DIR}/*/)
     _delete_firewall_port "${XRAY[PORT]}"
-elif [[ ${OPERATION} == stop ]]; then
+    exit 0
+fi
+
+if [[ ! -f "${ROOT_DIR}/${XRAY[MODE]}/docker-compose.yaml" ]]; then
+    echo "${ROOT_DIR}/${XRAY[MODE]}/docker-compose.yaml does not exist"
+    exit 1
+fi
+
+if [[ ${OPERATION} == stop ]]; then
     docker-compose -f "${ROOT_DIR}/${XRAY[MODE]}/docker-compose.yaml" stop
 elif [[ ${OPERATION} == restart ]]; then
     docker-compose -f "${ROOT_DIR}/${XRAY[MODE]}/docker-compose.yaml" restart
