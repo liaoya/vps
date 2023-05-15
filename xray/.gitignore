@@ -1,4 +1,6 @@
 .*options
+-client/*
+-server/*
 client/config.json
 client/docker-compose.yaml
 server/config.json
