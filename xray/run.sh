@@ -127,9 +127,9 @@ COMPOSE_PROJECT_NAME=$(basename "${ROOT_DIR}")
 if [[ -n ${XRAY[PROTOCOL]} ]]; then
     COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}-${XRAY[PROTOCOL]}
 fi
-if [[ -n ${XRAY[STREAM]} ]]; then
-    COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}-${XRAY[STREAM]}
-fi
+# if [[ -n ${STREAM} ]]; then
+#     COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}-${STREAM}
+# fi
 export COMPOSE_PROJECT_NAME
 
 if [[ ${OPERATION} == start ]]; then

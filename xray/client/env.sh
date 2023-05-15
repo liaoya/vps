@@ -50,6 +50,16 @@ if [[ ! -f "${_THIS_DIR}/config.json" ]]; then
         fi
     fi
 
+    if [[ ${PROTOCOL} == vless ]]; then
+        jq . "${_THIS_DIR}/config.json" |
+            jq --arg value "${XRAY[SERVER]}" '.outbounds[2].settings.vnext[0].address=$value' |
+            jq --argjson value "${XRAY[PORT]}" '.outbounds[2].settings.vnext[0].port=$value' |
+            jq '.outbounds[2].settings.vnext[0].users[0].encryption="none"' |
+            jq --arg value "${XRAY[VLESS_ID]}" '.outbounds[2].settings.vnext[0].users[0].id=$value' |
+            jq -S . |
+            sponge "${_THIS_DIR}/config.json"
+    fi
+
     if [[ ${PROTOCOL} == vmess ]]; then
         jq . "${_THIS_DIR}/config.json" |
             jq --arg value "${XRAY[SERVER]}" '.outbounds[2].settings.vnext[0].address=$value' |
@@ -62,6 +72,7 @@ if [[ ! -f "${_THIS_DIR}/config.json" ]]; then
     fi
 
     if [[ ${STREAM} == kcp ]]; then
+        if [[ ${PROTOCOL} == shadowsocks ]]; then XRAY[KCP_SEED]=""; fi
         jq . "${_THIS_DIR}/config.json" |
             jq --arg value "${XRAY[KCP_HEADER_TYPE]}" '.outbounds[2].streamSettings.kcpSettings.header.type=$value' |
             jq --arg value "${XRAY[KCP_SEED]}" '.outbounds[2].streamSettings.kcpSettings.seed=$value' |

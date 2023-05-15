@@ -45,7 +45,7 @@ fi
 
 if [[ ${PROTOCOL} == shadowsocks ]]; then
     _read_param shadowsocks_method "2022-blake3-aes-256-gcm"
-    _read_param shadowsocks_network "tcp,udp"
+    _read_param shadowsocks_network "tcp"
     _read_param shadowsocks_password "$(tr -cd '[:alnum:]' </dev/urandom | fold -w32 | head -n1)"
     if [[ ${XRAY[SHADOWSOCKS_METHOD]} == 2022-blake3* ]]; then
         if [[ ${#XRAY[SHADOWSOCKS_PASSWORD]} -ne 32 ]]; then
@@ -53,6 +53,10 @@ if [[ ${PROTOCOL} == shadowsocks ]]; then
             exit 1
         fi
     fi
+fi
+
+if [[ ${PROTOCOL} == vless ]]; then
+    _read_param vless_id "$(cat /proc/sys/kernel/random/uuid)"
 fi
 
 if [[ ${PROTOCOL} == vmess ]]; then

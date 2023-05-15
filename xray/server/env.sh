@@ -23,7 +23,7 @@ if [[ ! -f "${_THIS_DIR}/config.json" ]]; then
 {
   "inbounds": [
     {
-      "port": 0,
+      "port": ${XRAY[PORT]},
       "protocol": "${XRAY[PROTOCOL]}"
     }
   ],
@@ -61,12 +61,20 @@ EOF
         fi
     fi
 
+    if [[ ${PROTOCOL} == vless ]]; then
+        yq -i '.services.server.ports += "'"${XRAY[PORT]}:${XRAY[PORT]}"'/tcp"' "${_THIS_DIR}/docker-compose.yaml"
+        yq -i '.services.server.ports += "'"${XRAY[PORT]}:${XRAY[PORT]}"'/udp"' "${_THIS_DIR}/docker-compose.yaml"
+        jq . "${_THIS_DIR}/config.json" |
+            jq ".inbounds[0].settings.decryption=\"none\"" |
+            jq ".inbounds[0].settings.clients[0].id=\"${XRAY[VLESS_ID]}\"" |
+            jq -S . |
+            sponge "${_THIS_DIR}/config.json"
+    fi
+
     if [[ ${PROTOCOL} == vmess ]]; then
         yq -i '.services.server.ports += "'"${XRAY[PORT]}:${XRAY[PORT]}"'/tcp"' "${_THIS_DIR}/docker-compose.yaml"
         yq -i '.services.server.ports += "'"${XRAY[PORT]}:${XRAY[PORT]}"'/udp"' "${_THIS_DIR}/docker-compose.yaml"
         jq . "${_THIS_DIR}/config.json" |
-            jq ".inbounds[0].port=${XRAY[PORT]}" |
-            jq ".inbounds[0].protocol=\"vmess\"" |
             jq ".inbounds[0].settings.clients[0].alterId=0" |
             jq ".inbounds[0].settings.clients[0].id=\"${XRAY[VMESS_ID]}\"" |
             jq ".inbounds[0].settings.clients[0].security=\"auto\"" |
@@ -76,6 +84,7 @@ EOF
     fi
 
     if [[ ${STREAM} == kcp ]]; then
+        if [[ ${PROTOCOL} == shadowsocks ]]; then XRAY[KCP_SEED]=""; fi
         jq . "${_THIS_DIR}/config.json" |
             jq --arg value "${XRAY[KCP_HEADER_TYPE]}" '.inbounds[0].streamSettings.kcpSettings.header.type=$value' |
             jq --arg value "${XRAY[KCP_SEED]}" '.inbounds[0].streamSettings.kcpSettings.seed=$value' |
