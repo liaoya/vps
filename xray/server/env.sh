@@ -65,14 +65,14 @@ EOF
         jq . "${_THIS_DIR}/config.json" |
             jq --arg value "${XRAY[KCP_HEADER_TYPE]}" '.inbounds[0].streamSettings.kcpSettings.header.type=$value' |
             jq --arg value "${XRAY[KCP_SEED]}" '.inbounds[0].streamSettings.kcpSettings.seed=$value' |
-            jq --argjson value "${XRAY[KCP_CONGESTION]}" '.inbounds[0].streamSettings.congestion=$value' |
-            jq --argjson value "${XRAY[KCP_SERVER_DOWN_CAPACITY]}" '.inbounds[0].streamSettings.downlinkCapacity=$value' |
-            jq --argjson value "${XRAY[KCP_MTU]}" '.inbounds[0].streamSettings.mtu=$value' |
-            jq --argjson value "${XRAY[KCP_SERVER_UP_CAPACITY]}" '.inbounds[0].streamSettings.uplinkCapacity=$value' |
+            jq --argjson value "${XRAY[KCP_CONGESTION]}" '.inbounds[0].streamSettings.kcpSettings.congestion=$value' |
+            jq --argjson value "${XRAY[KCP_SERVER_DOWN_CAPACITY]}" '.inbounds[0].streamSettings.kcpSettings.downlinkCapacity=$value' |
+            jq --argjson value "${XRAY[KCP_MTU]}" '.inbounds[0].streamSettings.kcpSettings.mtu=$value' |
+            jq --argjson value "${XRAY[KCP_SERVER_UP_CAPACITY]}" '.inbounds[0].streamSettings.kcpSettings.uplinkCapacity=$value' |
+            jq '.inbounds[0].streamSettings.kcpSettings.readBufferSize=5' |
+            jq '.inbounds[0].streamSettings.kcpSettings.tti=30' |
+            jq '.inbounds[0].streamSettings.kcpSettings.writeBufferSize=5' |
             jq '.inbounds[0].streamSettings.network="kcp"' |
-            jq '.inbounds[0].streamSettings.readBufferSize=5' |
-            jq '.inbounds[0].streamSettings.tti=30' |
-            jq '.inbounds[0].streamSettings.writeBufferSize=5' |
             jq -S . |
             sponge "${_THIS_DIR}/config.json"
     fi
