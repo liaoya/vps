@@ -61,6 +61,20 @@ EOF
         fi
     fi
 
+    if [[ ${PROTOCOL} == vmess ]]; then
+        yq -i '.services.server.ports += "'"${XRAY[PORT]}:${XRAY[PORT]}"'/tcp"' "${_THIS_DIR}/docker-compose.yaml"
+        yq -i '.services.server.ports += "'"${XRAY[PORT]}:${XRAY[PORT]}"'/udp"' "${_THIS_DIR}/docker-compose.yaml"
+        jq . "${_THIS_DIR}/config.json" |
+            jq ".inbounds[0].port=${XRAY[PORT]}" |
+            jq ".inbounds[0].protocol=\"vmess\"" |
+            jq ".inbounds[0].settings.clients[0].alterId=0" |
+            jq ".inbounds[0].settings.clients[0].id=\"${XRAY[VMESS_ID]}\"" |
+            jq ".inbounds[0].settings.clients[0].security=\"auto\"" |
+            jq ".inbounds[0].settings.disableInsecureEncryption=true" |
+            jq -S . |
+            sponge "${_THIS_DIR}/config.json"
+    fi
+
     if [[ ${STREAM} == kcp ]]; then
         jq . "${_THIS_DIR}/config.json" |
             jq --arg value "${XRAY[KCP_HEADER_TYPE]}" '.inbounds[0].streamSettings.kcpSettings.header.type=$value' |

@@ -26,9 +26,15 @@ if [[ ! -f "${_THIS_DIR}/config.json" ]]; then
         jq '.log.loglevel="debug"' "${_THIS_DIR}/config.json" | sponge "${_THIS_DIR}/config.json"
     fi
 
+    jq . "${_THIS_DIR}/config.json" |
+        jq --arg value "${XRAY[PROTOCOL]}" '.outbounds[2].protocol=$value' |
+        jq -S . |
+        sponge "${_THIS_DIR}/config.json"
+
     if [[ ${PROTOCOL} == shadowsocks ]]; then
         jq . "${_THIS_DIR}/config.json" |
-            jq --arg value "${XRAY[PROTOCOL]}" '.outbounds[2].protocol=$value' |
+            jq '.outbounds[2].mux.concurrency=4' |
+            jq '.outbounds[2].mux.enabled=false' |
             jq --arg value "${XRAY[SERVER]}" '.outbounds[2].settings.servers[0].address=$value' |
             jq --argjson value "${XRAY[PORT]}" '.outbounds[2].settings.servers[0].port=$value' |
             jq --arg value "${XRAY[SHADOWSOCKS_METHOD]}" '.outbounds[2].settings.servers[0].method=$value' |
@@ -42,6 +48,17 @@ if [[ ! -f "${_THIS_DIR}/config.json" ]]; then
                 jq -S . |
                 sponge "${_THIS_DIR}/config.json"
         fi
+    fi
+
+    if [[ ${PROTOCOL} == vmess ]]; then
+        jq . "${_THIS_DIR}/config.json" |
+            jq --arg value "${XRAY[SERVER]}" '.outbounds[2].settings.vnext[0].address=$value' |
+            jq --argjson value "${XRAY[PORT]}" '.outbounds[2].settings.vnext[0].port=$value' |
+            jq '.outbounds[2].settings.vnext[0].users[0].alterId=0' |
+            jq --arg value "${XRAY[VMESS_ID]}" '.outbounds[2].settings.vnext[0].users[0].id=$value' |
+            jq '.outbounds[2].settings.vnext[0].users[0].security="auto"' |
+            jq -S . |
+            sponge "${_THIS_DIR}/config.json"
     fi
 
     if [[ ${STREAM} == kcp ]]; then

@@ -57,8 +57,6 @@ fi
 
 if [[ ${PROTOCOL} == vmess ]]; then
     _read_param vmess_id "$(cat /proc/sys/kernel/random/uuid)"
-    _read_param vmess_port $((RANDOM % 10000 + 20000))
-    _read_param vmess_kcp_header_type dtls
 fi
 
 if [[ ${STREAM} == kcp ]]; then
