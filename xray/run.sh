@@ -14,10 +14,10 @@ function print_usage() {
         _candidate=${_candidate:+${_candidate}|}$(basename "${_item}")
     done < <(ls -1d "${ROOT_DIR}"/*/)
     cat <<EOF
-Usage: $(basename "${BASH_SOURCE[0]}") OPTIONS <clean|restart|start|stop> <${_candidate}> <shadowsocks|vmess|vless> <kcp|quic>
+Usage: $(basename "${BASH_SOURCE[0]}") OPTIONS <create|delete|restart|start|stop> <${_candidate}> <shadowsocks|vmess|vless> <kcp|quic>
     -h, show the help
     -v, verbose mode
-    -d RUNTIME, the directory for clean, start and stop.
+    -d RUNTIME, the directory for restart, start and stop.
     -f EVNFILE, The environment file. ${EVNFILE:+the default is ${EVNFILE}}
     -m MODE, server or client. ${MODE:+the default is ${MODE}}
     -n PREFIX, the prefix name will be used in RUNTIME directory
@@ -25,10 +25,12 @@ Usage: $(basename "${BASH_SOURCE[0]}") OPTIONS <clean|restart|start|stop> <${_ca
     -s STREAM, xray stream, either of empty, kcp
 Example:
     $(basename "${BASH_SOURCE[0]}") clean
-    $(basename "${BASH_SOURCE[0]}") -m server -p shadowsocks start
-    $(basename "${BASH_SOURCE[0]}") -m server -p shadowsocks -s kcp start
-    $(basename "${BASH_SOURCE[0]}") restart shadowsocks-server-kcp
-    $(basename "${BASH_SOURCE[0]}") stop shadowsocks-server-kcp
+    $(basename "${BASH_SOURCE[0]}") -m server -p shadowsocks create
+    $(basename "${BASH_SOURCE[0]}") -m server -p shadowsocks -s kcp create
+    $(basename "${BASH_SOURCE[0]}") -d shadowsocks-server-kcp start
+    $(basename "${BASH_SOURCE[0]}") -d shadowsocks-server-kcp restart
+    $(basename "${BASH_SOURCE[0]}") -d shadowsocks-server-kcp stop
+    $(basename "${BASH_SOURCE[0]}") -d shadowsocks-server-kcp delete
 EOF
 }
 
@@ -120,39 +122,54 @@ for cmd in docker docker-compose jq yq; do
     fi
 done
 
-if [[ ${OPERATION} == start ]] && [[ -z ${MODE} || -z ${PROTOCOL} || -z ${EVNFILE} ]]; then
+if [[ ${OPERATION} == create ]] && [[ -z ${MODE} || -z ${PROTOCOL} || -z ${EVNFILE} ]]; then
     print_usage
     exit 1
 fi
 
-if [[ ${OPERATION} != start && ! -d ${RUNTIME} ]]; then
+if [[ ${OPERATION} != create && ! -d ${RUNTIME} ]]; then
     echo "${OPERATION} require a runtime folder"
     exit 1
 fi
 
-if [[ ${OPERATION} == start ]]; then
+if [[ ${OPERATION} == create ]]; then
     if [[ ! -e ${EVNFILE} ]]; then touch "${EVNFILE}"; fi
     if [[ -f "${ROOT_DIR}/pre.sh" ]]; then source "${ROOT_DIR}/pre.sh"; fi
 
-    RUNTIME=${XRAY[PROTOCOL]}-${XRAY[MODE]}
+    RUNTIME=${XRAY[PROTOCOL]}
     if [[ ${PREFIX} ]]; then RUNTIME=${PREFIX}-${RUNTIME}; fi
     if [[ -n ${STREAM} ]]; then RUNTIME=${RUNTIME}-${STREAM}; fi
+    RUNTIME=${RUNTIME}-${XRAY[MODE]}
     export RUNTIME=${ROOT_DIR}/${RUNTIME}
     mkdir -p "${RUNTIME}"
     cp "${EVNFILE}" "${RUNTIME}"/.options
-    cat <<EOF >"${RUNTIME}/pre.sh"
+    cat <<'EOF' >"${RUNTIME}/pre.sh"
 #!/bin/bash
 
-COMPOSE_PROJECT_NAME=\$(readlink -f "\${BASH_SOURCE[0]}")
-COMPOSE_PROJECT_NAME=\$(dirname "\${COMPOSE_PROJECT_NAME}")
-COMPOSE_PROJECT_NAME=xray-\$(basename "\${COMPOSE_PROJECT_NAME}")
-COMPOSE_PROJECT_NAME=\${COMPOSE_PROJECT_NAME/-server/}
-COMPOSE_PROJECT_NAME=\${COMPOSE_PROJECT_NAME/-client/}
+_THIS_DIR=$(readlink -f "${BASH_SOURCE[0]}")
+_THIS_DIR=$(dirname "${_THIS_DIR}")
+
+COMPOSE_PROJECT_NAME=xray-$(basename "${_THIS_DIR}")
+COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME/-server/}
+COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME/-client/}
 export COMPOSE_PROJECT_NAME
 
+declare -A XRAY
+export XRAY
+
+if [[ -f "${_THIS_DIR}/.options" ]]; then
+    while read -r line; do
+        key=$(echo "${line}" | cut -d= -f1)
+        value=$(echo "${line}" | cut -d= -f2)
+        XRAY["${key^^}"]="${value}"
+    done < "${_THIS_DIR}/.options"
+fi
+
+unset -v _THIS_DIR
 EOF
     if [[ -f "${ROOT_DIR}/${XRAY[MODE]}/env.sh" ]]; then source "${ROOT_DIR}/${XRAY[MODE]}/env.sh"; fi
-    if [[ -f "${ROOT_DIR}/post.sh" && ${OPERATION} == start ]]; then source "${ROOT_DIR}/post.sh"; fi
+    if [[ -f "${ROOT_DIR}/post.sh" ]]; then source "${ROOT_DIR}/post.sh"; fi
+    exit 0
 fi
 
 if [[ ! -f "${RUNTIME}/docker-compose.yaml" ]]; then
@@ -160,26 +177,25 @@ if [[ ! -f "${RUNTIME}/docker-compose.yaml" ]]; then
     exit 1
 fi
 if [[ -f "${RUNTIME}/pre.sh" ]]; then source "${RUNTIME}/pre.sh"; fi
-if [[ -f "${RUNTIME}/.options" ]]; then source "${RUNTIME}/.options"; fi
 
 #shellcheck disable=SC2154
-if [[ ${OPERATION} == clean ]]; then
+if [[ ${OPERATION} == delete ]]; then
     docker-compose -f "${RUNTIME}/docker-compose.yaml" down -v
     while IFS= read -r _container; do
         docker container rm -f -v "${_container}"
     done < <(docker ps -a --format '{{.Names}}' | grep -E "^${COMPOSE_PROJECT_NAME}")
-    _delete_firewall_port "${port}"
+    _delete_firewall_port "${XRAY[PORT]}"
     rm -fr "${RUNTIME}"
 elif [[ ${OPERATION} == start ]]; then
     docker-compose -f "${RUNTIME}/docker-compose.yaml" up -d
     if [[ ${mode} == server ]]; then
-        _add_firewall_port "${port}"
+        _add_firewall_port "${XRAY[PORT]}"
     fi
 elif [[ ${OPERATION} == stop ]]; then
     docker-compose -f "${RUNTIME}/docker-compose.yaml" stop
 elif [[ ${OPERATION} == restart ]]; then
     docker-compose -f "${RUNTIME}/docker-compose.yaml" restart
     if [[ ${mode} == server ]]; then
-        _add_firewall_port "${port}"
+        _add_firewall_port "${XRAY[PORT]}"
     fi
 fi

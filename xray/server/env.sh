@@ -34,7 +34,7 @@ if [[ ! -f "${RUNTIME}/config.json" ]]; then
   ]
 }
 EOF
-    if [[ ${VERBOSE} ]]; then
+    if [[ ${VERBOSE} -gt 0 ]]; then
         jq '.log.loglevel="debug"' "${RUNTIME}/config.json" | sponge "${RUNTIME}/config.json"
     fi
 

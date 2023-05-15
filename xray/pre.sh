@@ -75,7 +75,11 @@ if [[ ${STREAM} == kcp ]]; then
     _read_param kcp_mtu 1350
     _read_param kcp_server_down_capacity 200
     _read_param kcp_server_up_capacity 200
-    _read_param kcp_seed "$(tr -cd '[:alnum:]' </dev/urandom | fold -w15 | head -n1)"
+    if [[ ${PROTOCOL} != shadowsocks ]]; then
+        _read_param kcp_seed "$(tr -cd '[:alnum:]' </dev/urandom | fold -w15 | head -n1)"
+    else
+        _read_param kcp_seed ""
+    fi
 fi
 
 if [[ -z ${XRAY[VERSION]} ]]; then
@@ -89,5 +93,18 @@ fi
 } | sort
 
 _check_param MODE PORT PROTOCOL SERVER VERSION
+
+for _key in "${!XRAY[@]}"; do
+    if [[ -n ${XRAY[${_key}]} ]]; then
+        sed -i -e "/^${_key,,}=/d" -e "/^${_key^^}=/d" "${EVNFILE}"
+    fi
+done
+
+for _key in "${!XRAY[@]}"; do
+    if [[ -n ${XRAY[${_key}]} ]]; then
+        echo "${_key,,}=${XRAY[${_key}]}" >>"${EVNFILE}"
+    fi
+done
+sort "${EVNFILE}" | sponge "${EVNFILE}"
 
 [[ -n "${tracestate}" ]] && eval "${tracestate}"

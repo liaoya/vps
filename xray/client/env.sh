@@ -22,7 +22,7 @@ fi
 
 if [[ ! -f "${RUNTIME}/config.json" ]]; then
     cp "${_THIS_DIR}/client.tpl.json" "${RUNTIME}/config.json"
-    if [[ ${VERBOSE} ]]; then
+    if [[ ${VERBOSE} -gt 0 ]]; then
         jq '.log.loglevel="debug"' "${RUNTIME}/config.json" | sponge "${RUNTIME}/config.json"
     fi
 
