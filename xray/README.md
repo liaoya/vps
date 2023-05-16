@@ -10,32 +10,24 @@ The script demand the following tools
 rm -f .options
 export SERVER=
 
+# shadowsocks
+# Initial the options files
+bash create.sh -m server -p shadowsocks
+bash create.sh -m server -p shadowsocks -s kcp
+
+bash create.sh -m server -f .raksmart.shadowsocks.options
+bash create.sh -m client -f .raksmart.shadowsocks.options
+
 # vless
-bash create.sh -m server -p shadowsocks create
-
-bash create.sh -m client -p shadowsocks create
-
-bash create.sh -m server -p shadowsocks -s kcp create
-
-bash create.sh -m client -p shadowsocks -s kcp create
-
-# vless
-bash create.sh -m server -p vless create
-
-bash create.sh -m client -p vless create
-
-bash create.sh -m server -p vless -s kcp create
-
-bash create.sh -m client -p vless -s kcp create
+# Initial the options files
+bash create.sh -m server -p vless
+bash create.sh -m server -p vless -s kcp
+bash create.sh -m server -p vless -s quic
 
 # vmess
-bash create.sh -m server -p vmess create
+bash create.sh -m server -p vmess
+bash create.sh -m server -p vmess -s kcp
 
-bash create.sh -m client -p vmess create
-
-bash create.sh -m server -p vmess -s kcp create
-
-bash create.sh -m client -p vmess -s kcp create
 ```
 
 ## Reference

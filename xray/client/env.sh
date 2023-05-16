@@ -84,6 +84,16 @@ if [[ ! -f "${_THIS_DIR}/config.json" ]]; then
             jq -S . |
             sponge "${_THIS_DIR}/config.json"
     fi
+
+    if [[ ${STREAM} == quic ]]; then
+        jq . "${_THIS_DIR}/config.json" |
+            jq '.outbounds[2].streamSettings.network="quic"' |
+            jq --arg value "${XRAY[QUIC_HEADER_TYPE]}" '.outbounds[2].streamSettings.quicSettings.header.type=$value' |
+            jq --arg value "${XRAY[QUIC_KEY]}" '.outbounds[2].streamSettings.quicSettings.key=$value' |
+            jq --arg value "${XRAY[QUIC_SECURITY]}" '.outbounds[2].streamSettings.quicSettings.security=$value' |
+            jq -S . |
+            sponge "${_THIS_DIR}/config.json"
+    fi
 fi
 
 unset -v _THIS_DIR

@@ -114,4 +114,7 @@ elif [[ ${1} == restart ]]; then
     if [[ ${XRAY[MODE]} == server ]]; then
         _add_firewall_port "${XRAY[PORT]}"
     fi
+else
+    echo "${1} is unknown operation"
+    exit 1
 fi

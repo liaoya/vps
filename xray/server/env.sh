@@ -96,6 +96,16 @@ EOF
             jq -S . |
             sponge "${_THIS_DIR}/config.json"
     fi
+
+    if [[ ${STREAM} == quic ]]; then
+        jq . "${_THIS_DIR}/config.json" |
+            jq '.inbounds[0].streamSettings.network="quic"' |
+            jq --arg value "${XRAY[QUIC_HEADER_TYPE]}" '.inbounds[0].streamSettings.quicSettings.header.type=$value' |
+            jq --arg value "${XRAY[QUIC_KEY]}" '.inbounds[0].streamSettings.quicSettings.key=$value' |
+            jq --arg value "${XRAY[QUIC_SECURITY]}" '.inbounds[0].streamSettings.quicSettings.security=$value' |
+            jq -S . |
+            sponge "${_THIS_DIR}/config.json"
+    fi
 fi
 
 unset -v _THIS_DIR

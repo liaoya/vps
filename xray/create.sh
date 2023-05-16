@@ -8,18 +8,13 @@ ROOT_DIR=$(dirname "${ROOT_DIR}")
 export ROOT_DIR
 
 function print_usage() {
-    local _candidate _item
-    #shellcheck disable=SC2010
-    while IFS= read -r _item; do
-        _candidate=${_candidate:+${_candidate}|}$(basename "${_item}")
-    done < <(ls -1d "${ROOT_DIR}"/*/)
     cat <<EOF
 Usage: $(basename "${BASH_SOURCE[0]}") OPTIONS
     -h, show the help
     -v, verbose mode
     -d RUNTIME, the directory for running
     -f EVNFILE, The environment file. ${EVNFILE:+the default is ${EVNFILE}}
-    -m MODE <${_candidate}>, ${MODE:+the default is ${MODE}}
+    -m MODE <server|client>, ${MODE:+the default is ${MODE}}
     -n PREFIX, the prefix name will be used in RUNTIME directory
     -p PROTOCOL <shadowsocks|vmess|vless>, xray protocol
     -s STREAM [kcp|quic], xray stream
@@ -92,7 +87,7 @@ for cmd in docker docker-compose jq sponge yq; do
     fi
 done
 
-if [[ -z ${MODE} || -z ${PROTOCOL} || -z ${EVNFILE} ]]; then
+if [[ -z ${MODE} || -z ${EVNFILE} ]]; then
     print_usage
     exit 1
 fi

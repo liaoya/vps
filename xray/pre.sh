@@ -34,12 +34,15 @@ set +x
 _read_param mode "${MODE}"
 _read_param port $((RANDOM % 10000 + 20000))
 _read_param protocol "${PROTOCOL}"
+export PROTOCOL=${XRAY[PROTOCOL]}
 _read_param stream
+export STREAM=${XRAY[STREAM]}
 _read_param version
 
 if [[ ${MODE} == server ]]; then
     _read_param server "${SERVER:-$(curl -sL https://httpbin.org/get | jq -r .origin)}"
 else
+    unset -v SERVER
     _read_param server
 fi
 
@@ -80,6 +83,12 @@ if [[ ${STREAM} == kcp ]]; then
     else
         _read_param kcp_seed ""
     fi
+fi
+
+if [[ ${STREAM} == quic ]]; then
+    _read_param quic_header_type dtls
+    _read_param quic_key "$(tr -cd '[:alnum:]' </dev/urandom | fold -w15 | head -n1)"
+    _read_param quic_security aes-128-gcm
 fi
 
 if [[ -z ${XRAY[VERSION]} ]]; then
