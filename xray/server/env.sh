@@ -1,7 +1,10 @@
 #!/bin/bash
 
-if [[ ! -f "${RUNTIME}/docker-compose.yaml" ]]; then
-    cat <<EOF >"${RUNTIME}/docker-compose.yaml"
+_THIS_DIR=$(readlink -f "${BASH_SOURCE[0]}")
+_THIS_DIR=$(dirname "${_THIS_DIR}")
+
+if [[ ! -f "${_THIS_DIR}/docker-compose.yaml" ]]; then
+    cat <<EOF >"${_THIS_DIR}/docker-compose.yaml"
 ---
 version: "3"
 
@@ -15,8 +18,8 @@ services:
 EOF
 fi
 
-if [[ ! -f "${RUNTIME}/config.json" ]]; then
-    cat <<EOF | jq -S . | tee "${RUNTIME}/config.json"
+if [[ ! -f "${_THIS_DIR}/config.json" ]]; then
+    cat <<EOF | jq -S . >"${_THIS_DIR}/config.json"
 {
   "inbounds": [
     {
@@ -34,55 +37,52 @@ if [[ ! -f "${RUNTIME}/config.json" ]]; then
   ]
 }
 EOF
-    if [[ ${VERBOSE} -gt 0 ]]; then
-        jq '.log.loglevel="debug"' "${RUNTIME}/config.json" | sponge "${RUNTIME}/config.json"
-    fi
 
     if [[ ${PROTOCOL} == shadowsocks ]]; then
-        yq -i '.services.server.ports += "'"${XRAY[PORT]}":8388'/tcp"' "${RUNTIME}/docker-compose.yaml"
-        yq -i '.services.server.ports += "'"${XRAY[PORT]}":8388'/udp"' "${RUNTIME}/docker-compose.yaml"
+        yq -i '.services.server.ports += "'"${XRAY[PORT]}":8388'/tcp"' "${_THIS_DIR}/docker-compose.yaml"
+        yq -i '.services.server.ports += "'"${XRAY[PORT]}":8388'/udp"' "${_THIS_DIR}/docker-compose.yaml"
 
-        jq . "${RUNTIME}/config.json" |
+        jq . "${_THIS_DIR}/config.json" |
             jq ".inbounds[0].port=8388" |
             jq --arg value "${XRAY[SHADOWSOCKS_METHOD]}" '.inbounds[0].settings.method=$value' |
             jq --arg value "${XRAY[SHADOWSOCKS_PASSWORD]}" '.inbounds[0].settings.password=$value' |
             jq --arg value "${XRAY[SHADOWSOCKS_NETWORK]}" '.inbounds[0].settings.network=$value' |
             jq -S . |
-            sponge "${RUNTIME}/config.json"
+            sponge "${_THIS_DIR}/config.json"
         if [[ ${XRAY[SHADOWSOCKS_METHOD]} == 2022-blake3* ]]; then
             #shellcheck disable=SC2086
-            jq . "${RUNTIME}/config.json" |
+            jq . "${_THIS_DIR}/config.json" |
                 jq --arg value "$(echo ${XRAY[SHADOWSOCKS_PASSWORD]} | base64)" '.inbounds[0].settings.password=$value' |
                 jq -S . |
-                sponge "${RUNTIME}/config.json"
+                sponge "${_THIS_DIR}/config.json"
         fi
     fi
 
     if [[ ${PROTOCOL} == vless ]]; then
-        yq -i '.services.server.ports += "'"${XRAY[PORT]}:${XRAY[PORT]}"'/tcp"' "${RUNTIME}/docker-compose.yaml"
-        yq -i '.services.server.ports += "'"${XRAY[PORT]}:${XRAY[PORT]}"'/udp"' "${RUNTIME}/docker-compose.yaml"
-        jq . "${RUNTIME}/config.json" |
+        yq -i '.services.server.ports += "'"${XRAY[PORT]}:${XRAY[PORT]}"'/tcp"' "${_THIS_DIR}/docker-compose.yaml"
+        yq -i '.services.server.ports += "'"${XRAY[PORT]}:${XRAY[PORT]}"'/udp"' "${_THIS_DIR}/docker-compose.yaml"
+        jq . "${_THIS_DIR}/config.json" |
             jq ".inbounds[0].settings.decryption=\"none\"" |
             jq ".inbounds[0].settings.clients[0].id=\"${XRAY[VLESS_ID]}\"" |
             jq -S . |
-            sponge "${RUNTIME}/config.json"
+            sponge "${_THIS_DIR}/config.json"
     fi
 
     if [[ ${PROTOCOL} == vmess ]]; then
-        yq -i '.services.server.ports += "'"${XRAY[PORT]}:${XRAY[PORT]}"'/tcp"' "${RUNTIME}/docker-compose.yaml"
-        yq -i '.services.server.ports += "'"${XRAY[PORT]}:${XRAY[PORT]}"'/udp"' "${RUNTIME}/docker-compose.yaml"
-        jq . "${RUNTIME}/config.json" |
+        yq -i '.services.server.ports += "'"${XRAY[PORT]}:${XRAY[PORT]}"'/tcp"' "${_THIS_DIR}/docker-compose.yaml"
+        yq -i '.services.server.ports += "'"${XRAY[PORT]}:${XRAY[PORT]}"'/udp"' "${_THIS_DIR}/docker-compose.yaml"
+        jq . "${_THIS_DIR}/config.json" |
             jq ".inbounds[0].settings.clients[0].alterId=0" |
             jq ".inbounds[0].settings.clients[0].id=\"${XRAY[VMESS_ID]}\"" |
             jq ".inbounds[0].settings.clients[0].security=\"auto\"" |
             jq ".inbounds[0].settings.disableInsecureEncryption=true" |
             jq -S . |
-            sponge "${RUNTIME}/config.json"
+            sponge "${_THIS_DIR}/config.json"
     fi
 
     if [[ ${STREAM} == kcp ]]; then
         if [[ ${PROTOCOL} == shadowsocks ]]; then XRAY[KCP_SEED]=""; fi
-        jq . "${RUNTIME}/config.json" |
+        jq . "${_THIS_DIR}/config.json" |
             jq --arg value "${XRAY[KCP_HEADER_TYPE]}" '.inbounds[0].streamSettings.kcpSettings.header.type=$value' |
             jq --arg value "${XRAY[KCP_SEED]}" '.inbounds[0].streamSettings.kcpSettings.seed=$value' |
             jq --argjson value "${XRAY[KCP_CONGESTION]}" '.inbounds[0].streamSettings.kcpSettings.congestion=$value' |
@@ -94,6 +94,8 @@ EOF
             jq '.inbounds[0].streamSettings.kcpSettings.writeBufferSize=5' |
             jq '.inbounds[0].streamSettings.network="kcp"' |
             jq -S . |
-            sponge "${RUNTIME}/config.json"
+            sponge "${_THIS_DIR}/config.json"
     fi
 fi
+
+unset -v _THIS_DIR

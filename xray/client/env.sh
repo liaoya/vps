@@ -3,8 +3,8 @@
 _THIS_DIR=$(readlink -f "${BASH_SOURCE[0]}")
 _THIS_DIR=$(dirname "${_THIS_DIR}")
 
-if [[ ! -f "${RUNTIME}/docker-compose.yaml" ]]; then
-    cat <<EOF >"${RUNTIME}/docker-compose.yaml"
+if [[ ! -f "${_THIS_DIR}/docker-compose.yaml" ]]; then
+    cat <<EOF >"${_THIS_DIR}/docker-compose.yaml"
 ---
 version: "3"
 
@@ -20,19 +20,16 @@ services:
 EOF
 fi
 
-if [[ ! -f "${RUNTIME}/config.json" ]]; then
-    cp "${_THIS_DIR}/client.tpl.json" "${RUNTIME}/config.json"
-    if [[ ${VERBOSE} -gt 0 ]]; then
-        jq '.log.loglevel="debug"' "${RUNTIME}/config.json" | sponge "${RUNTIME}/config.json"
-    fi
+if [[ ! -f "${_THIS_DIR}/config.json" ]]; then
+    cp "${_THIS_DIR}/client.tpl.json" "${_THIS_DIR}/config.json"
 
-    jq . "${RUNTIME}/config.json" |
+    jq . "${_THIS_DIR}/config.json" |
         jq --arg value "${XRAY[PROTOCOL]}" '.outbounds[2].protocol=$value' |
         jq -S . |
-        sponge "${RUNTIME}/config.json"
+        sponge "${_THIS_DIR}/config.json"
 
     if [[ ${PROTOCOL} == shadowsocks ]]; then
-        jq . "${RUNTIME}/config.json" |
+        jq . "${_THIS_DIR}/config.json" |
             jq '.outbounds[2].mux.concurrency=4' |
             jq '.outbounds[2].mux.enabled=false' |
             jq --arg value "${XRAY[SERVER]}" '.outbounds[2].settings.servers[0].address=$value' |
@@ -40,40 +37,40 @@ if [[ ! -f "${RUNTIME}/config.json" ]]; then
             jq --arg value "${XRAY[SHADOWSOCKS_METHOD]}" '.outbounds[2].settings.servers[0].method=$value' |
             jq --arg value "${XRAY[SHADOWSOCKS_PASSWORD]}" '.outbounds[2].settings.servers[0].password=$value' |
             jq -S . |
-            sponge "${RUNTIME}/config.json"
+            sponge "${_THIS_DIR}/config.json"
         if [[ ${XRAY[SHADOWSOCKS_METHOD]} == 2022-blake3* ]]; then
             #shellcheck disable=SC2086
-            jq . "${RUNTIME}/config.json" |
+            jq . "${_THIS_DIR}/config.json" |
                 jq --arg value "$(echo ${XRAY[SHADOWSOCKS_PASSWORD]} | base64)" '.outbounds[2].settings.servers[0].password=$value' |
                 jq -S . |
-                sponge "${RUNTIME}/config.json"
+                sponge "${_THIS_DIR}/config.json"
         fi
     fi
 
     if [[ ${PROTOCOL} == vless ]]; then
-        jq . "${RUNTIME}/config.json" |
+        jq . "${_THIS_DIR}/config.json" |
             jq --arg value "${XRAY[SERVER]}" '.outbounds[2].settings.vnext[0].address=$value' |
             jq --argjson value "${XRAY[PORT]}" '.outbounds[2].settings.vnext[0].port=$value' |
             jq '.outbounds[2].settings.vnext[0].users[0].encryption="none"' |
             jq --arg value "${XRAY[VLESS_ID]}" '.outbounds[2].settings.vnext[0].users[0].id=$value' |
             jq -S . |
-            sponge "${RUNTIME}/config.json"
+            sponge "${_THIS_DIR}/config.json"
     fi
 
     if [[ ${PROTOCOL} == vmess ]]; then
-        jq . "${RUNTIME}/config.json" |
+        jq . "${_THIS_DIR}/config.json" |
             jq --arg value "${XRAY[SERVER]}" '.outbounds[2].settings.vnext[0].address=$value' |
             jq --argjson value "${XRAY[PORT]}" '.outbounds[2].settings.vnext[0].port=$value' |
             jq '.outbounds[2].settings.vnext[0].users[0].alterId=0' |
             jq --arg value "${XRAY[VMESS_ID]}" '.outbounds[2].settings.vnext[0].users[0].id=$value' |
             jq '.outbounds[2].settings.vnext[0].users[0].security="auto"' |
             jq -S . |
-            sponge "${RUNTIME}/config.json"
+            sponge "${_THIS_DIR}/config.json"
     fi
 
     if [[ ${STREAM} == kcp ]]; then
         if [[ ${PROTOCOL} == shadowsocks ]]; then XRAY[KCP_SEED]=""; fi
-        jq . "${RUNTIME}/config.json" |
+        jq . "${_THIS_DIR}/config.json" |
             jq --arg value "${XRAY[KCP_HEADER_TYPE]}" '.outbounds[2].streamSettings.kcpSettings.header.type=$value' |
             jq --arg value "${XRAY[KCP_SEED]}" '.outbounds[2].streamSettings.kcpSettings.seed=$value' |
             jq --argjson value "${XRAY[KCP_CONGESTION]}" '.outbounds[2].streamSettings.kcpSettings.congestion=$value' |
@@ -85,7 +82,7 @@ if [[ ! -f "${RUNTIME}/config.json" ]]; then
             jq '.outbounds[2].streamSettings.kcpSettings.writeBufferSize=5' |
             jq '.outbounds[2].streamSettings.network="kcp"' |
             jq -S . |
-            sponge "${RUNTIME}/config.json"
+            sponge "${_THIS_DIR}/config.json"
     fi
 fi
 
