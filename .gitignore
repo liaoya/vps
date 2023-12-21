@@ -131,12 +131,5 @@ tags
 
 # End of https://www.gitignore.io/api/emacs,git,sublimetext,textmate,vim,visualstudiocode
 
-*-imagebuilder-*.Linux-*.tar.xz
-*-sdk-*.Linux-*.tar.xz
-*-imagebuilder-*Linux-*/
-*-sdk-*.Linux-*/
-sha256sums*
-/sdk/lede
-.python-version
 xray-plugin
 xray-plugin_linux_amd64*

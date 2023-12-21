@@ -20,9 +20,12 @@ bash create.sh -m client -f .raksmart.shadowsocks.options
 
 # vless
 # Initial the options files
+rm -f .options
 bash create.sh -m server -p vless
-bash create.sh -m server -p vless -s kcp
-bash create.sh -m server -p vless -s quic
+rm -f .options
+env KCP_SEED= bash create.sh -m server -p vless -s kcp
+rm -fr .options
+env QUIC_KEY= bash create.sh -m server -p vless -s quic
 
 # vmess
 bash create.sh -m server -p vmess

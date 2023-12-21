@@ -11,15 +11,59 @@ sed -i 's|^/swapfile|# /swapfile|' /etc/fstab
 sed -i 's|^/swap.img|# /swap.img|' /etc/fstab
 rm -f /swapfile /swap.img
 
+sed -i -e "/# set PATH so it includes user's private bin if it exists/,+4d" ~/.profile
+cat <<'EOF' | tee -a ~/.profile
+# set PATH so it includes user's private bin if it exists
+if [ -d "$HOME/bin" ] && ! test "${PATH#*$HOME/bin}" != "$PATH"; then
+    PATH="$HOME/bin:$PATH"
+fi
+
+# set PATH so it includes user's private bin if it exists
+if [ -d "$HOME/.local/bin" ] && ! test "${PATH#*"$HOME"/.local/bin}" != "$PATH"; then
+    PATH="$HOME/.local/bin:$PATH"
+fi
+EOF
+
+mkdir -p ~/.bashrc.d ~/.bash_completion.d ~/.local/bin ~/Downloads ~/Documents
+cat <<'EOF' | tee -a ~/.bashrc
+[ -d ~/.bashrc.d ] && for _script in ~/.bashrc.d/*.sh; do [ -f "${_script}" ] && source "${_script}"; done
+[ -d ~/.bash_completion.d ] && for _script in ~/.bash_completion.d/*.sh; do [ -f "${_script}" ] && source "${_script}"; done
+EOF
+
+if ! grep -s -q "^pathmunge () {" "${HOME}/.bashrc"; then
+    cat <<'EOF' >> ~/.bashrc
+pathmunge () {
+    case ":${PATH}:" in
+        *:"$1":*)
+        ;;
+        *)
+            if [ "$2" = "after" ] ; then
+                PATH=$PATH:$1
+            else
+                PATH=$1:$PATH
+            fi
+    esac
+}
+#[[ -d "${HOME}/.local/bin" ]] &&  pathmunge "${HOME}/.local/bin"
+pathmunge /sbin
+EOF
+    [[ -d "${HOME}/.local/bin" ]] || mkdir -p "${HOME}/.local/bin"
+    source ~/.bashrc
+fi
+
+curl -sL https://bootstrap.pypa.io/get-pip.py -o /tmp/get-pip.py
+PYTHON_EXEC=$(find /usr/bin -type f -iname "python*" | grep -v "m$" | grep -v '-' | sort | tail -1)
+eval "${PYTHON_EXEC}" /tmp/get-pip.py --user
+
+[[ -f /etc/apt/sources.list.save ]] || cp -pr /etc/apt/sources.list /etc/apt/sources.list.save
+MIRROR_URL=http://mirrors.ubuntu.com/JP.txt
+wget ${MIRROR_URL}
+apt-smart -F $(basename ${MIRROR_URL}) -a
+[[ -f /etc/apt/sources.list.save ]] && cp -pr /etc/apt/sources.list.save /etc/apt/sources.list
+sed -i -e 's/^deb-src/#deb-src/' /etc/apt/sources.list
+
 export APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=yes
 export DEBIAN_FRONTEND=noninteractive
-
-UBUNTU_MIRROR_PATH=http://ftp.ucsb.edu//pub/mirrors/linux/ubuntu
-[[ -f /etc/apt/sources.list.save ]] || cp -pr /etc/apt/sources.list /etc/apt/sources.list.save
-[[ -f /etc/apt/sources.list.save ]] && cp -pr /etc/apt/sources.list.save /etc/apt/sources.list
-sed -i -e "s%http://.*archive.ubuntu.com%${UBUNTU_MIRROR_PATH}%" \
-    -e "s%http://security.ubuntu.com%${UBUNTU_MIRROR_PATH}%" /etc/apt/sources.list
-sed -i -e 's/^deb-src/#deb-src/' /etc/apt/sources.list
 
 apt update -qq -y
 # apt upgrade -qq -y -o "Dpkg::Use-Pty=0"
@@ -49,19 +93,46 @@ elif [[ ${VERSION} -eq 2204 ]]; then
     ppa_repos+=(ppa:fish-shell/release-3 ppa:jonathonf/vim)
 fi
 for ppa in "${ppa_repos[@]}"; do add-apt-repository -y "$ppa"; done
-apt update -qq -y
-apt upgrade -q -y
 
-apt install -qq -y certbot curl docker.io dos2unix fish git gnupg jq moreutils nmon nano sshpass tig tmux ufw vim
-apt install -qq -y python3-distutils
+if [[ ! -f /etc/needrestart/needrestart.conf ]]; then
+    apt-get update -qy
+    apt-get install needrestart
+fi
+sed -i -e '/^\$nrconf{restart}/d' -e "/^#\$nrconf{restart}/a \$nrconf{restart} = 'a';" /etc/needrestart/needrestart.conf
 
-curl -sL https://github.com/mikefarah/yq/releases/download/v4.29.2/yq_linux_amd64 -o /usr/local/bin/yq
-chmod a+x /usr/local/bin/yq
+apt-get update -qq -y
+apt-get upgrade -q -y
+
+UBUNTU_VERSION=$(lsb_release -r | cut -d':' -f2 | tr -d '[:space:]')
+apt-get install -qy --no-install-recommends "linux-generic-hwe-${UBUNTU_VERSION}"
+
+apt-get install -qq -y certbot curl docker.io docker-compose dos2unix fish git gnupg moreutils nmon nano sshpass tig tmux ufw vim
+apt-get install -qq -y python3-distutils
+
+curl https://zyedidia.github.io/eget.sh | sh
+mv ./eget /usr/local/bin
+chown 0:0 /usr/local/bin/eget
+eget --upgrade-only --to=/usr/local/bin --asset="jq-linux-amd64" jqlang/jq
+eget --upgrade-only --to=/usr/local/bin --asset="^.tar.gz" mikefarah/yq
+eget --upgrade-only --to=/usr/local/bin --asset="^musl" starship/starship
 
 mkdir ~/.ssh
 chmod 700 ~/.ssh
 touch ~/.ssh/authorized_keys
-chmod 600 ~/.ssh/authorized_keys
+chmod 644 ~/.ssh/authorized_keys
+
+# create normal user
+SUDO_USER=tshen
+useradd -g users -s /bin/bash -m "$SUDO_USER"
+echo "$(id -un $SUDO_USER) ALL=(ALL) NOPASSWD: ALL" | tee "/etc/sudoers.d/$(id -un $SUDO_USER)"
+SUDO_USER_DIR=$(getent passwd "$SUDO_USER" | cut -d: -f6)
+mkdir "$SUDO_USER_DIR/.ssh"
+touch "$SUDO_USER_DIR/.ssh/authorized_keys"
+chown -R "$(id -u $SUDO_USER):$(id -g $SUDO_USER)" "$SUDO_USER_DIR/.ssh"
+chmod 700 "$SUDO_USER_DIR/.ssh"
+chmod 644 "$SUDO_USER_DIR/.ssh/authorized_keys"
+getent group docker && usermod -aG docker "${SUDO_USER}"
+
 
 # https://unix.stackexchange.com/questions/130786/can-i-remove-files-in-var-log-journal-and-var-cache-abrt-di-usr
 echo "SystemMaxUse=100M" | sudo tee -a /etc/systemd/journald.conf
@@ -77,18 +148,40 @@ ufw status
 # Make sure ssh is allowed
 ufw enable
 ufw status
+```
 
-# create normal user
-SUDO_USER=
-useradd -g users -s /bin/bash -m "$SUDO_USER"
-echo "$(id -un $SUDO_USER) ALL=(ALL) NOPASSWD: ALL" | tee "/etc/sudoers.d/$(id -un $SUDO_USER)"
-SUDO_USER_DIR=$(getent passwd "$SUDO_USER" | cut -d: -f6)
-mkdir "$SUDO_USER_DIR/.ssh"
-touch "$SUDO_USER_DIR/.ssh/authorized_keys"
-chown -R "$(id -u $SUDO_USER):$(id -g $SUDO_USER)" "$SUDO_USER_DIR/.ssh"
-chmod 700 "$SUDO_USER_DIR/.ssh"
-chmod 600 "$SUDO_USER_DIR/.ssh/authorized_keys"
-getent group docker && usermod -aG docker "${SUDO_USER}"
+```bash
+cat <<EOF | tee /etc/profile.d/starship.sh
+#!/bin/bash
+
+if [[ $TERM != linux && $TERM != vt220 ]] && command -v starship 1>/dev/null 2>&1; then
+    eval "$(starship init bash)"
+fi
+EOF
+
+mkdir -p /etc/fish/conf.d
+
+cat <<EOF | tee /etc/fish/conf.d/starship.fish
+#!/bin/env fish
+
+if command -sq starship
+    starship init fish | source
+end
+EOF
+
+cat <<EOF | tee /etc/starship.toml
+command_timeout=1000
+
+[localip]
+disabled=true
+
+[shell]
+disabled=false
+style="black bold"
+EOF
+
+echo '#!/bin/bash' | tee /usr/local/bin/starship_precmd
+chmod a+x /usr/local/bin/starship_precmd
 ```
 
 ## Enable BBR in 18.04

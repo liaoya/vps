@@ -16,13 +16,7 @@ The server will always start with a kcptun service, sip003 is optional
 rm -f .options
 
 # start the service, this is prefer.
-env KCPTUN_PORT= SHADOWSOCKS_PASSWORD= SHADOWSOCKS_PORT= bash run.sh start server
-# If want to lock the KCPTUN version.
-env KCPTUN_PORT= KCPTUN_VERSION=v20221008 SHADOWSOCKS_PASSWORD= SHADOWSOCKS_PORT= bash run.sh start server
-
-# start the service with sip003
-env KCPTUN_PORT= SHADOWSOCKS_PASSWORD= SHADOWSOCKS_PORT= bash run.sh -p xray-plugin -m "mode=grpc" start server
-env KCPTUN_PORT= SHADOWSOCKS_PASSWORD= SHADOWSOCKS_PORT= SHADOWSOCKS_SERVER= SIP003_PLUGIN=xray-plugin SIP003_PLUGIN_OPTS=mode=grpc bash run.sh start server
+env SHADOWSOCKS_PASSWORD= SHADOWSOCKS_METHOD=aes-256-gcm SIP003_PLUGIN=xray-plugin SIP003_PLUGIN_OPTS=mode=grpc bash run.sh start server
 
 # stop and remove the service
 bash run.sh clean; bash run start server

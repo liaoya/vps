@@ -5,3 +5,4 @@ client/config.json
 client/docker-compose.yaml
 server/config.json
 server/docker-compose.yaml
+.*env
