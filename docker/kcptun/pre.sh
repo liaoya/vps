@@ -3,7 +3,7 @@
 _this_dir=$(readlink -f "${BASH_SOURCE[0]}")
 _this_dir=$(dirname "${_this_dir}")
 
-export ALPINE_BASE=${ALPINE_IMAGE:-docker.io/library/alpine:3.17.3@sha256:b6ca290b6b4cdcca5b3db3ffa338ee0285c11744b4a6abaa9627746ee3291d8d}
+export ALPINE_BASE=${ALPINE_IMAGE:-docker.io/library/alpine:3.18.5@sha256:d695c3de6fcd8cfe3a6222b0358425d40adfd129a8a47c3416faff1a8aece389}
 
 check_command jq
 
