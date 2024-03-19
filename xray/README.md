@@ -31,6 +31,9 @@ env QUIC_KEY= bash create.sh -m server -p vless -s quic
 bash create.sh -m server -p vmess
 bash create.sh -m server -p vmess -s kcp
 
+# Use the existing option file
+bash create.sh -f .vless-kcp-server.options -m server -p vless -s kcp
+bash create.sh -f .vless-quic-server.options -m server -p vless -s quic
 ```
 
 ## Reference

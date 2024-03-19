@@ -1,4 +1,5 @@
 .*options
+.*env
 client/docker-compose.yaml
 client/ss-local.json
 kcp/docker-compose.yaml

@@ -45,12 +45,12 @@ _read_param xray_plugin_version
 
 if [[ -z ${SHADOWSOCKS[KCPTUN_VERSION]} ]]; then
     KCPTUN_VERSION=${KCPTUN_VERSION:-$(curl -s "https://api.github.com/repos/xtaci/kcptun/tags" | jq -r '.[0].name')}
-    KCPTUN_VERSION=${KCPTUN_VERSION:-v20230214}
+    KCPTUN_VERSION=${KCPTUN_VERSION:-v20240107}
     SHADOWSOCKS[KCPTUN_VERSION]="${KCPTUN_VERSION}"
 fi
 if [[ -z ${SHADOWSOCKS[SHADOWSOCKS_RUST_VERSION]} ]]; then
     SHADOWSOCKS_RUST_VERSION=${SHADOWSOCKS_RUST_VERSION:-$(curl -sL "https://api.github.com/repos/shadowsocks/shadowsocks-rust/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')}
-    SHADOWSOCKS_RUST_VERSION=${SHADOWSOCKS_RUST_VERSION:-v1.15.3}
+    SHADOWSOCKS_RUST_VERSION=${SHADOWSOCKS_RUST_VERSION:-v1.18.2}
     SHADOWSOCKS[SHADOWSOCKS_RUST_VERSION]="${SHADOWSOCKS_RUST_VERSION}"
 fi
 if [[ -z ${SHADOWSOCKS[V2RAY_PLUGIN_VERSION]} ]]; then
@@ -60,7 +60,7 @@ if [[ -z ${SHADOWSOCKS[V2RAY_PLUGIN_VERSION]} ]]; then
 fi
 if [[ -z ${SHADOWSOCKS[XRAY_PLUGIN_VERSION]} ]]; then
     XRAY_PLUGIN_VERSION=${XRAY_PLUGIN_VERSION:-$(curl -s "https://api.github.com/repos/teddysun/xray-plugin/tags" | jq -r '.[0].name')}
-    XRAY_PLUGIN_VERSION=${XRAY_PLUGIN_VERSION:-v1.8.1}
+    XRAY_PLUGIN_VERSION=${XRAY_PLUGIN_VERSION:-v1.8.9}
     SHADOWSOCKS[XRAY_PLUGIN_VERSION]="${XRAY_PLUGIN_VERSION}"
 fi
 

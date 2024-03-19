@@ -93,7 +93,7 @@ fi
 
 if [[ -z ${XRAY[VERSION]} ]]; then
     VERSION=${VERSION:-$(curl -s https://api.github.com/repos/xtls/xray-core/releases/latest | jq -r .tag_name)}
-    VERSION=${VERSION:-v1.7.5}
+    VERSION=${VERSION:-v1.8.9}
     XRAY[VERSION]="${VERSION}"
 fi
 

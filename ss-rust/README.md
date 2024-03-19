@@ -50,15 +50,15 @@ Setup server at first, then copy `.options` to client side, add `shadowsocks_ser
 
 ```text
 kcptun_port=23399
-kcptun_version=v20230214
+kcptun_version=v20240107
 shadowsocks_password=
 shadowsocks_port=22314
-shadowsocks_rust_version=v1.15.3
+shadowsocks_rust_version=v1.18.2
 #shadowsocks_server=
 #sip003_plugin_opts=mode=grpc
 #sip003_plugin=xray-plugin
 v2ray_plugin_version=v1.3.2
-xray_plugin_version=v1.7.5
+xray_plugin_version=v1.8.9
 ```
 
 ## Reference
