@@ -80,7 +80,7 @@ for key in EVNFILE MODE PROTOCOL STREAM; do
     fi
 done
 
-for cmd in docker docker-compose jq sponge yq; do
+for cmd in docker jq sponge yq; do
     if ! command -v "${cmd}" 1>/dev/null 2>&1; then
         echo "${cmd} is required"
         exit 1

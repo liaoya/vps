@@ -105,17 +105,17 @@ if [[ ${1} == clean ]]; then
     done < <(ls -1d ${ROOT_DIR}/*/)
     _delete_firewall_port "${V2RAY[PORT]}" "${V2RAY[MKCP_PORT]}"
 elif [[ ${1} == restart ]]; then
-    docker-compose -f "${ROOT_DIR}/${2}/docker-compose.yaml" restart
+    docker compose -f "${ROOT_DIR}/${2}/docker-compose.yaml" restart
     if [[ ${2} == server ]]; then
         _add_firewall_port "${V2RAY[PORT]}" "${V2RAY[MKCP_PORT]}"
     fi
 elif [[ ${1} == start ]]; then
-    docker-compose -f "${ROOT_DIR}/${2}/docker-compose.yaml" up -d
+    docker compose -f "${ROOT_DIR}/${2}/docker-compose.yaml" up -d
     if [[ ${2} == server ]]; then
         _add_firewall_port "${V2RAY[PORT]}" "${V2RAY[MKCP_PORT]}"
     fi
 elif [[ ${1} == stop ]]; then
-    docker-compose -f "${ROOT_DIR}/${2}/docker-compose.yaml" stop
+    docker compose -f "${ROOT_DIR}/${2}/docker-compose.yaml" stop
 else
     echo "Unknown opereation"
 fi

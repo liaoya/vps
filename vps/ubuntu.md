@@ -106,7 +106,7 @@ apt-get upgrade -q -y
 UBUNTU_VERSION=$(lsb_release -r | cut -d':' -f2 | tr -d '[:space:]')
 apt-get install -qy --no-install-recommends "linux-generic-hwe-${UBUNTU_VERSION}"
 
-apt-get install -qq -y certbot curl docker.io docker-compose dos2unix fish git gnupg moreutils nmon nano sshpass tig tmux ufw vim
+apt-get install -qq -y certbot curl docker.io docker-compose-v2 dos2unix fish git gnupg moreutils nmon nano sshpass tig tmux ufw vim
 apt-get install -qq -y python3-distutils
 
 curl https://zyedidia.github.io/eget.sh | sh
@@ -380,7 +380,7 @@ fi
 ### Install some tools with pip
 
 ```bash
-pip install --user --upgrade docker-compose httpie ipython
+pip install --user --upgrade docker compose httpie ipython
 ```
 
 ## Reference

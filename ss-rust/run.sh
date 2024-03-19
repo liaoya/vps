@@ -51,7 +51,7 @@ Usage: $(basename "${BASH_SOURCE[0]}") options <clean|restart|start|stop> <${_ca
 EOF
 }
 
-_check_command docker docker-compose jq yq
+_check_command docker jq yq
 
 declare -A SHADOWSOCKS
 export SHADOWSOCKS
@@ -121,17 +121,17 @@ if [[ ${1} == clean ]]; then
     done < <(ls -1d ${ROOT_DIR}/*/)
     _delete_firewall_port "${SHADOWSOCKS[KCPTUN_PORT]}" "${SHADOWSOCKS[SHADOWSOCKS_PORT]}"
 elif [[ ${1} == restart ]]; then
-    docker-compose -f "${ROOT_DIR}/${2}/docker-compose.yaml" restart
+    docker compose -f "${ROOT_DIR}/${2}/docker-compose.yaml" restart
     if [[ ${2} == server ]]; then
         _add_firewall_port "${SHADOWSOCKS[KCPTUN_PORT]}" "${SHADOWSOCKS[SHADOWSOCKS_PORT]}"
     fi
 elif [[ ${1} == start ]]; then
-    docker-compose -f "${ROOT_DIR}/${2}/docker-compose.yaml" up -d
+    docker compose -f "${ROOT_DIR}/${2}/docker-compose.yaml" up -d
     if [[ ${2} == server ]]; then
         _add_firewall_port "${SHADOWSOCKS[KCPTUN_PORT]}" "${SHADOWSOCKS[SHADOWSOCKS_PORT]}"
     fi
 elif [[ ${1} == stop ]]; then
-    docker-compose -f "${ROOT_DIR}/${2}/docker-compose.yaml" stop
+    docker compose -f "${ROOT_DIR}/${2}/docker-compose.yaml" stop
 else
     echo "Unknown opereation"
 fi

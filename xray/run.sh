@@ -63,7 +63,7 @@ while getopts ":hvl:" opt; do
 done
 shift $((OPTIND - 1))
 
-for cmd in docker docker-compose jq sponge yq; do
+for cmd in docker docker compose jq sponge yq; do
     if ! command -v "${cmd}" 1>/dev/null 2>&1; then
         echo "${cmd} is required"
         exit 1
@@ -93,24 +93,24 @@ done <"${_THIS_DIR}/.options"
 
 if [[ $(jq -r '.log.loglevel' "${_THIS_DIR}/config.json") != "${LOGLEVEL}" ]]; then
     jq --arg value "${LOGLEVEL}" '.log.loglevel=$value' "${_THIS_DIR}/config.json" | sponge "${_THIS_DIR}/config.json"
-    docker-compose -f "${_THIS_DIR}/docker-compose.yaml" stop
+    docker compose -f "${_THIS_DIR}/docker-compose.yaml" stop
 fi
 
 if [[ ${1} == clean ]]; then
-    docker-compose -f "${_THIS_DIR}/docker-compose.yaml" down -v
+    docker compose -f "${_THIS_DIR}/docker-compose.yaml" down -v
     while IFS= read -r _container; do
         docker container rm -f -v "${_container}"
     done < <(docker ps -a --format '{{.Names}}' | grep -E "^${COMPOSE_PROJECT_NAME}")
     _delete_firewall_port "${XRAY[PORT]}"
 elif [[ ${1} == start ]]; then
-    docker-compose -f "${_THIS_DIR}/docker-compose.yaml" up -d
+    docker compose -f "${_THIS_DIR}/docker-compose.yaml" up -d
     if [[ ${XRAY[MODE]} == server ]]; then
         _add_firewall_port "${XRAY[PORT]}"
     fi
 elif [[ ${1} == stop ]]; then
-    docker-compose -f "${_THIS_DIR}/docker-compose.yaml" stop
+    docker compose -f "${_THIS_DIR}/docker-compose.yaml" stop
 elif [[ ${1} == restart ]]; then
-    docker-compose -f "${_THIS_DIR}/docker-compose.yaml" restart
+    docker compose -f "${_THIS_DIR}/docker-compose.yaml" restart
     if [[ ${XRAY[MODE]} == server ]]; then
         _add_firewall_port "${XRAY[PORT]}"
     fi
