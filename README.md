@@ -1,6 +1,6 @@
 # README
 
-This repo contain
+This repo contains
 
 - ansible scripts
 - docker image
@@ -31,3 +31,15 @@ cat ~/Documents/vps/v2ray/vmess/.options
 ```
 
 - <https://really-simple-ssl.com/mozilla_pkix_error_required_tls_feature_missing/>： `MOZILLA_PKIX_ERROR_REQUIRED_TLS_FEATURE_MISSING`
+
+```bash
+# curl -sL "https://api.github.com/repos/xtaci/kcptun/tags" | jq -r '.[0].name'
+# curl -sL "https://api.github.com/repos/shadowsocks/shadowsocks-rust/releases/latest" | jq -r '.[0].name'
+# curl -sL "https://api.github.com/repos/teddysun/xray-plugin/tags" | jq -r '.[0].name'
+# curl -sL https://api.github.com/repos/xtls/xray-core/releases/latest | jq -r .tag_name
+
+export KCPTUN_VERSION=v20240919
+export SHADOWSOCKS_RUST_VERSION=v1.20.4
+export XRAY_PLUGIN_VERSION=v1.8.24
+export XRAY_VERSION=v1.8.24
+```

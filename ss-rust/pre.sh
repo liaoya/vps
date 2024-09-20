@@ -44,23 +44,19 @@ _read_param v2ray_plugin_version
 _read_param xray_plugin_version
 
 if [[ -z ${SHADOWSOCKS[KCPTUN_VERSION]} ]]; then
-    KCPTUN_VERSION=${KCPTUN_VERSION:-$(curl -s "https://api.github.com/repos/xtaci/kcptun/tags" | jq -r '.[0].name')}
-    KCPTUN_VERSION=${KCPTUN_VERSION:-v20240107}
+    KCPTUN_VERSION=${KCPTUN_VERSION:-$(curl -sL "https://api.github.com/repos/xtaci/kcptun/tags" | jq -r '.[0].name')}
     SHADOWSOCKS[KCPTUN_VERSION]="${KCPTUN_VERSION}"
 fi
 if [[ -z ${SHADOWSOCKS[SHADOWSOCKS_RUST_VERSION]} ]]; then
     SHADOWSOCKS_RUST_VERSION=${SHADOWSOCKS_RUST_VERSION:-$(curl -sL "https://api.github.com/repos/shadowsocks/shadowsocks-rust/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')}
-    SHADOWSOCKS_RUST_VERSION=${SHADOWSOCKS_RUST_VERSION:-v1.18.2}
     SHADOWSOCKS[SHADOWSOCKS_RUST_VERSION]="${SHADOWSOCKS_RUST_VERSION}"
 fi
 if [[ -z ${SHADOWSOCKS[V2RAY_PLUGIN_VERSION]} ]]; then
-    V2RAY_PLUGIN_VERSION=${V2RAY_PLUGIN_VERSION:-$(curl -s "https://api.github.com/repos/shadowsocks/v2ray-plugin/releases/latest" | jq -r '.tag_name')}
-    V2RAY_PLUGIN_VERSION=${V2RAY_PLUGIN_VERSION:-v1.3.2}
+    V2RAY_PLUGIN_VERSION=${V2RAY_PLUGIN_VERSION:-$(curl -sL "https://api.github.com/repos/shadowsocks/v2ray-plugin/releases/latest" | jq -r '.tag_name')}
     SHADOWSOCKS[V2RAY_PLUGIN_VERSION]="${V2RAY_PLUGIN_VERSION}"
 fi
 if [[ -z ${SHADOWSOCKS[XRAY_PLUGIN_VERSION]} ]]; then
-    XRAY_PLUGIN_VERSION=${XRAY_PLUGIN_VERSION:-$(curl -s "https://api.github.com/repos/teddysun/xray-plugin/tags" | jq -r '.[0].name')}
-    XRAY_PLUGIN_VERSION=${XRAY_PLUGIN_VERSION:-v1.8.9}
+    XRAY_PLUGIN_VERSION=${XRAY_PLUGIN_VERSION:-$(curl -sL "https://api.github.com/repos/teddysun/xray-plugin/tags" | jq -r '.[0].name')}
     SHADOWSOCKS[XRAY_PLUGIN_VERSION]="${XRAY_PLUGIN_VERSION}"
 fi
 

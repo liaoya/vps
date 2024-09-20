@@ -3,7 +3,7 @@
 _this_dir=$(readlink -f "${BASH_SOURCE[0]}")
 _this_dir=$(dirname "${_this_dir}")
 
-export ALPINE_BASE=${ALPINE_IMAGE:-docker.io/library/alpine:3.18.5@sha256:d695c3de6fcd8cfe3a6222b0358425d40adfd129a8a47c3416faff1a8aece389}
+export ALPINE_BASE=${ALPINE_IMAGE:-docker.io/library/alpine:3.20.3@sha256:beefdbd8a1da6d2915566fde36db9db0b524eb737fc57cd1367effd16dc0d06d}
 
 check_command jq
 
@@ -29,3 +29,5 @@ else
     echo "Unkonwn ${DOCKERFILE}"
     exit 1
 fi
+
+unset -v _this_dir

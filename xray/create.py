@@ -25,7 +25,7 @@ def main(filename: str, mode: str, operation: str, protocal: str, stream: Option
     pass
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Create Xray config file and start docker-compose',
+    parser = argparse.ArgumentParser(description='Create Xray config file and docker-compose.yaml',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("-f", "--filename", help="option file name")
     parser.add_argument("-m", "--mode", choices=("client", "server"), required=True, help="")

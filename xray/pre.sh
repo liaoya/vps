@@ -92,16 +92,15 @@ if [[ ${STREAM} == quic ]]; then
 fi
 
 if [[ -z ${XRAY[VERSION]} ]]; then
-    VERSION=${VERSION:-$(curl -s https://api.github.com/repos/xtls/xray-core/releases/latest | jq -r .tag_name)}
-    VERSION=${VERSION:-v1.8.9}
-    XRAY[VERSION]="${VERSION}"
+    XRAY_VERSION=${XRAY_VERSION:-$(curl -s https://api.github.com/repos/xtls/xray-core/releases/latest | jq -r .tag_name)}
+    XRAY[VERSION]="${XRAY_VERSION}"
 fi
 
 {
     for key in "${!XRAY[@]}"; do echo "${key} => ${XRAY[${key}]}"; done
 } | sort
 
-_check_param MODE PORT PROTOCOL SERVER VERSION
+_check_param MODE PORT PROTOCOL SERVER XRAY_VERSION
 
 for _key in "${!XRAY[@]}"; do
     if [[ -n ${XRAY[${_key}]} ]]; then
