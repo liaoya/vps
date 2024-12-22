@@ -6,8 +6,6 @@ _THIS_DIR=$(dirname "${_THIS_DIR}")
 if [[ ! -f "${_THIS_DIR}/docker-compose.yaml" ]]; then
     cat <<EOF >"${_THIS_DIR}/docker-compose.yaml"
 ---
-version: "3"
-
 services:
   server:
     image: docker.io/teddysun/xray:${XRAY[VERSION]:1}

@@ -8,13 +8,10 @@ ROOT_DIR=$(dirname "${ROOT_DIR}")
 export ROOT_DIR
 
 function _check_command() {
-    while (($#)); do
-        if [[ -z $(command -v "${1}") ]]; then
-            echo "Command ${1} is required"
-            return 1
-        fi
-        shift
-    done
+    if [[ -z $(command -v "${1}") ]]; then
+        echo "Command ${1} is required. Run '$2'"
+        return 1
+    fi
 }
 
 function _add_firewall_port() {
@@ -51,7 +48,10 @@ Usage: $(basename "${BASH_SOURCE[0]}") options <clean|restart|start|stop> <${_ca
 EOF
 }
 
-_check_command docker jq yq
+_check_command docker "sudo apt intall -yq docker.io docker-compose-v2"
+_check_command jq "sudo apt intall -yq jq"
+_check_command sponge "sudo apt intall -yq moreutils"
+_check_command yq ""
 
 declare -A SHADOWSOCKS
 export SHADOWSOCKS

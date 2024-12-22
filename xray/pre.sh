@@ -100,7 +100,7 @@ fi
     for key in "${!XRAY[@]}"; do echo "${key} => ${XRAY[${key}]}"; done
 } | sort
 
-_check_param MODE PORT PROTOCOL SERVER XRAY_VERSION
+_check_param MODE PORT PROTOCOL SERVER VERSION
 
 for _key in "${!XRAY[@]}"; do
     if [[ -n ${XRAY[${_key}]} ]]; then

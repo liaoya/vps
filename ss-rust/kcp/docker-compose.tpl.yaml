@@ -1,6 +1,4 @@
 ---
-version: "3"
-
 services:
   kcptun-client:
     command: ["/usr/local/bin/client", "-c", "/etc/kcptun.json"]

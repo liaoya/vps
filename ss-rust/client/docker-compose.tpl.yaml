@@ -1,6 +1,4 @@
 ---
-version: "3"
-
 services:
   sslocal:
     image: ghcr.io/shadowsocks/sslocal-rust:${SHADOWSOCKS_RUST_VERSION}
