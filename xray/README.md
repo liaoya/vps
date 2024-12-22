@@ -23,9 +23,9 @@ bash create.sh -m client -f .raksmart.shadowsocks.options
 rm -f .options
 bash create.sh -m server -p vless
 rm -f .options
-env KCP_SEED= XRAY_VERSION=v1.8.24 bash create.sh -m server -p vless -s kcp
+env KCP_SEED= XRAY_VERSION=v1.8.24 bash create.sh -m server -p vless -s kcp -f vlkcp.options
 rm -fr .options
-env QUIC_KEY= XRAY_VERSION=v1.8.24 bash create.sh -m server -p vless -s quic
+env QUIC_KEY= XRAY_VERSION=v1.8.24 bash create.sh -m server -p vless -s quic -f vlquic.options
 
 # vmess
 bash create.sh -m server -p vmess

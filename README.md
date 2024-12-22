@@ -38,8 +38,8 @@ cat ~/Documents/vps/v2ray/vmess/.options
 # curl -sL "https://api.github.com/repos/teddysun/xray-plugin/tags" | jq -r '.[0].name'
 # curl -sL https://api.github.com/repos/xtls/xray-core/releases/latest | jq -r .tag_name
 
-export KCPTUN_VERSION=v20240919
-export SHADOWSOCKS_RUST_VERSION=v1.20.4
+export KCPTUN_VERSION=v20241119
+export SHADOWSOCKS_RUST_VERSION=v1.21.2
 export XRAY_PLUGIN_VERSION=v1.8.24
 export XRAY_VERSION=v1.8.24
 ```
