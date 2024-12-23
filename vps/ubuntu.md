@@ -51,9 +51,8 @@ EOF
     source ~/.bashrc
 fi
 
-curl -sL https://bootstrap.pypa.io/get-pip.py -o /tmp/get-pip.py
-PYTHON_EXEC=$(find /usr/bin -type f -iname "python*" | grep -v "m$" | grep -v '-' | sort | tail -1)
-eval "${PYTHON_EXEC}" /tmp/get-pip.py --user
+sudo bash -c 'curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR=/usr/local/bin sh'
+sudo chown 0:0 /usr/local/bin/uv*
 
 [[ -f /etc/apt/sources.list.save ]] || cp -pr /etc/apt/sources.list /etc/apt/sources.list.save
 MIRROR_URL=http://mirrors.ubuntu.com/JP.txt
@@ -73,6 +72,10 @@ apt install -qq -y bc
 VERSION=$(echo "$(lsb_release -r | cut -d':' -f2 | tr -d '[:space:]') * 100 / 1" | bc)
 
 declare -a ppa_repos
+ppa_repos+=(ppa:ansible/ansible ppa:fish-shell/release-3)
+ppa_repos+=(ppa:deadsnakes/ppa ppa:pypy/ppa) # ppa:deadsnakes/ppa for various python
+ppa_repos+=(ppa:maveonair/helix-editor)
+ppa_repos+=(ppa:neovim-ppa/unstable) # ppa:neovim-ppa/stable is very old
 if [[ ${VERSION} -eq 1804 ]]; then
     # ppa:deadsnakes/ppa for various python
     # ppa:git-core/ppa, now ppa:savoury1/backports has latest git
@@ -106,7 +109,7 @@ apt-get upgrade -q -y
 UBUNTU_VERSION=$(lsb_release -r | cut -d':' -f2 | tr -d '[:space:]')
 apt-get install -qy --no-install-recommends "linux-generic-hwe-${UBUNTU_VERSION}"
 
-apt-get install -qq -y certbot curl docker.io docker-compose-v2 dos2unix fish git gnupg moreutils nmon nano sshpass tig tmux ufw vim
+apt-get install -qq -y certbot curl docker.io docker-compose-v2 dos2unix fish git gnupg moreutils nmon nano powerline sshpass tig tmux ufw vim
 apt-get install -qq -y python3-distutils
 
 curl https://zyedidia.github.io/eget.sh | sh
@@ -115,6 +118,7 @@ chown 0:0 /usr/local/bin/eget
 eget --upgrade-only --to=/usr/local/bin --asset="jq-linux-amd64" jqlang/jq
 eget --upgrade-only --to=/usr/local/bin --asset="^.tar.gz" mikefarah/yq
 eget --upgrade-only --to=/usr/local/bin --asset="^musl" starship/starship
+eget --upgrade-only --to=/usr/local/bin zellij-org/zellij
 
 mkdir ~/.ssh
 chmod 700 ~/.ssh
@@ -298,11 +302,17 @@ EOF
 fi
 
 cat <<'EOF' > "${HOME}/.tmux.conf"
+bind-key C-m set-option -g mouse \; display-message "Mouse #{?mouse,on,off}"
 set -g buffer-limit 10000
 set -g default-shell /usr/bin/fish
 set -g history-limit 5000
 set -g renumber-windows on
 EOF
+
+tmuxfile=$(find /usr/share -iname powerline.conf 2>/dev/null | grep tmux/powerline.conf)
+if [[ -n $tmuxfile ]]; then
+    echo "source ${tmuxfile}" >> "${HOME}/.tmux.conf"
+fi
 ```
 
 ### Setup ntp
