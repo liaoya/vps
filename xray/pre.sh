@@ -91,6 +91,8 @@ if [[ ${STREAM} == quic ]]; then
     _read_param quic_security aes-128-gcm
 fi
 
+# Hard code the version since there're a lot of change for new version
+XRAY_VERSION=v1.8.24
 if [[ -z ${XRAY[VERSION]} ]]; then
     XRAY_VERSION=${XRAY_VERSION:-$(curl -s https://api.github.com/repos/xtls/xray-core/releases/latest | jq -r .tag_name)}
     XRAY[VERSION]="${XRAY_VERSION}"
