@@ -18,11 +18,15 @@ if [ -d "$HOME/bin" ] && ! test "${PATH#*$HOME/bin}" != "$PATH"; then
     PATH="$HOME/bin:$PATH"
 fi
 
-# set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/.local/bin" ] && ! test "${PATH#*"$HOME"/.local/bin}" != "$PATH"; then
-    PATH="$HOME/.local/bin:$PATH"
-fi
+sudo sed -i -e "/^GatewayPorts/d" -e "/^PermitRootLogin/d" -e "/^UseDNS/d" /etc/ssh/sshd_config
+sudo touch /etc/ssh/sshd_config.d/custom.conf
+sudo sed -i -e "/^GatewayPorts/d" -e "/^PermitRootLogin/d" -e "/^UseDNS/d" /etc/ssh/sshd_config.d/custom.conf
+cat <<EOF | sudo tee -a /etc/ssh/sshd_config.d/custom.conf
+GatewayPorts yes
+PermitRootLogin yes
+UseDNS no
 EOF
+sudo systemctl restart ssh
 
 mkdir -p ~/.bashrc.d ~/.bash_completion.d ~/.local/bin ~/Downloads ~/Documents
 cat <<'EOF' | tee -a ~/.bashrc
