@@ -19,8 +19,11 @@ Usage: $(basename "${BASH_SOURCE[0]}") OPTIONS
     -p PROTOCOL <shadowsocks|vmess|vless>, xray protocol
     -s STREAM [kcp|quic], xray stream
 Example:
+# Create environment with options generated
     $(basename "${BASH_SOURCE[0]}") -m server -p shadowsocks
     $(basename "${BASH_SOURCE[0]}") -m server -p shadowsocks -s kcp
+# Use the current options to create environment
+    $(basename "${BASH_SOURCE[0]}") -f .options
 EOF
 }
 
@@ -74,10 +77,20 @@ if [[ $# -eq 0 ]]; then
     exit 1
 fi
 
-for key in EVNFILE MODE PROTOCOL STREAM; do
+if [[ ! -e ${EVNFILE} ]]; then
+    touch "${EVNFILE}"
+else
+    source "${EVNFILE}"
+fi
+for key in MODE PROTOCOL STREAM; do
     if [[ -n ${!key} ]]; then
         export ${key}=${!key}
     fi
+    _lower=${key,,}
+    if [[ -n ${!_lower} ]]; then
+        export ${key}=${!_lower}
+    fi
+    set -e _lower
 done
 
 for cmd in docker jq sponge yq; do
@@ -87,12 +100,10 @@ for cmd in docker jq sponge yq; do
     fi
 done
 
-if [[ -z ${MODE} || -z ${EVNFILE} ]]; then
+if [[ -z ${MODE} || -z ${PROTOCOL} ]]; then
     print_usage
     exit 1
 fi
-
-if [[ ! -e ${EVNFILE} ]]; then touch "${EVNFILE}"; fi
 if [[ -f "${ROOT_DIR}/pre.sh" ]]; then source "${ROOT_DIR}/pre.sh"; fi
 
 RUNTIME=${XRAY[PROTOCOL]}
