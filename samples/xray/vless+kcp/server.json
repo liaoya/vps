@@ -1,0 +1,40 @@
+{
+  "inbounds": [
+    {
+      "port": 28672,
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "id": "48b35c3b-a29e-414c-8d5b-c9fb53473120"
+          }
+        ],
+        "decryption": "none"
+      },
+      "streamSettings": {
+        "kcpSettings": {
+          "congestion": false,
+          "downlinkCapacity": 200,
+          "header": {
+            "type": "dtls"
+          },
+          "mtu": 1350,
+          "readBufferSize": 5,
+          "seed": "<seed>",
+          "tti": 30,
+          "uplinkCapacity": 200,
+          "writeBufferSize": 5
+        },
+        "network": "kcp"
+      }
+    }
+  ],
+  "log": {
+    "loglevel": "warning"
+  },
+  "outbounds": [
+    {
+      "protocol": "freedom"
+    }
+  ]
+}

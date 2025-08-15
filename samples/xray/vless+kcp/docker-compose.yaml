@@ -1,0 +1,19 @@
+---
+services:
+  server:
+    image: docker.io/teddysun/xray:25.8.3
+    restart: always
+    ports:
+      - 28672:28672/tcp
+      - 28672:28672/udp
+    volumes:
+      - "./server.json:/etc/xray/config.json"
+
+  client:
+    image: docker.io/teddysun/xray:25.8.3
+    ports:
+      - 1080:1080
+      - 1081:1081
+    restart: always
+    volumes:
+      - "./client.json:/etc/xray/config.json"

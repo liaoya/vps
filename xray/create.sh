@@ -16,8 +16,8 @@ Usage: $(basename "${BASH_SOURCE[0]}") OPTIONS
     -f EVNFILE, The environment file. ${EVNFILE:+the default is ${EVNFILE}}
     -m MODE <server|client>, ${MODE:+the default is ${MODE}}
     -n PREFIX, the prefix name will be used in RUNTIME directory
-    -p PROTOCOL <shadowsocks|vmess|vless>, xray protocol
-    -s STREAM [kcp|quic], xray stream
+    -p PROTOCOL <shadowsocks|vless>, xray protocol
+    -s STREAM [kcp|xhttp], xray stream
 Example:
 # Create environment with options generated
     $(basename "${BASH_SOURCE[0]}") -m server -p shadowsocks
@@ -85,17 +85,28 @@ fi
 for key in MODE PROTOCOL STREAM; do
     if [[ -n ${!key} ]]; then
         export ${key}=${!key}
+        export ${key,,}=${!key}
+    else
+        _lower=${key,,}
+        if [[ -n ${!_lower} ]]; then
+            export ${key^^}="${!_lower}"
+        fi
+        set -e _lower
     fi
-    _lower=${key,,}
-    if [[ -n ${!_lower} ]]; then
-        export ${key}=${!_lower}
-    fi
-    set -e _lower
 done
 
-for cmd in docker jq sponge yq; do
-    if ! command -v "${cmd}" 1>/dev/null 2>&1; then
-        echo "${cmd} is required"
+_variables=(MODE PROTOCOL STREAM)
+for _var in "${_variables[@]}"; do
+    if [[ -z ${!key} ]]; then
+        echo "${_variables[@]}" "are required and ${_var} is missing"
+        exit 1
+    fi
+done
+
+_commands=(docker jq sponge yq)
+for _cmd in "${_commands[@]}"; do
+    if ! command -v "${_cmd}" 1>/dev/null 2>&1; then
+        echo "${_commands[@]}" "are required and ${_cmd} is missing"
         exit 1
     fi
 done
@@ -106,11 +117,14 @@ if [[ -z ${MODE} || -z ${PROTOCOL} ]]; then
 fi
 if [[ -f "${ROOT_DIR}/pre.sh" ]]; then source "${ROOT_DIR}/pre.sh"; fi
 
-RUNTIME=${XRAY[PROTOCOL]}
-if [[ ${PREFIX} ]]; then RUNTIME=${PREFIX}-${RUNTIME}; fi
-if [[ -n ${STREAM} ]]; then RUNTIME=${RUNTIME}-${STREAM}; fi
-RUNTIME=${RUNTIME}-${XRAY[MODE]}
+if [[ -z ${RUNTIME} ]]; then
+    RUNTIME=${XRAY[PROTOCOL]}
+    if [[ ${PREFIX} ]]; then RUNTIME=${PREFIX}-${RUNTIME}; fi
+    if [[ -n ${STREAM} ]]; then RUNTIME=${RUNTIME}-${STREAM}; fi
+    RUNTIME=${RUNTIME}-${XRAY[MODE]}
+fi
 export RUNTIME=${ROOT_DIR}/${RUNTIME}
+
 mkdir -p "${RUNTIME}"
 
 if [[ -f "${ROOT_DIR}/${XRAY[MODE]}/env.sh" ]]; then source "${ROOT_DIR}/${XRAY[MODE]}/env.sh"; fi
