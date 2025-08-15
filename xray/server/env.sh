@@ -116,7 +116,7 @@ EOF
             jq '.inbounds[0].streamSettings.network="xhttp"' |
             jq '.inbounds[0].streamSettings.security="tls"' |
             jq '.inbounds[0].streamSettings.tlsSettings.certificates[0].certificateFile="/etc/xray/certs/xray.crt"' |
-            jq '.inbounds[0].streamSettings.tlsSettings.certificates[0].keyFile="/etc/xray/certs/xray.keyls"' |
+            jq '.inbounds[0].streamSettings.tlsSettings.certificates[0].keyFile="/etc/xray/certs/xray.key"' |
             jq -S . |
             sponge "${RUNTIME}/config.json"
     fi
