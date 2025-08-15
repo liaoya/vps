@@ -1,0 +1,36 @@
+{
+  "inbounds": [
+    {
+      "port": 28080,
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "id": "48b35c3b-a29e-414c-8d5b-c9fb53473120"
+          }
+        ],
+        "decryption": "none"
+      },
+      "streamSettings": {
+        "network": "xhttp",
+        "security": "tls",
+        "tlsSettings": {
+          "certificates": [
+            {
+              "certificateFile": "/etc/xray/certs/xray.crt",
+              "keyFile": "/etc/xray/certs/xray.key"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "log": {
+    "loglevel": "warning"
+  },
+  "outbounds": [
+    {
+      "protocol": "freedom"
+    }
+  ]
+}

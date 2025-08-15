@@ -1,0 +1,12 @@
+---
+services:
+  server:
+    image: docker.io/teddysun/xray:25.8.3
+    restart: always
+    ports:
+      - 28080:28080/tcp
+      - 28080:28080/udp
+    volumes:
+      - "./config.json:/etc/xray/config.json"
+      - "./xray.crt:/etc/xray/certs/xray.crt"
+      - "./xray.key:/etc/xray/certs/xray.key"

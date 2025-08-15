@@ -1,0 +1,14 @@
+---
+name: proxy
+
+services:
+  client:
+    hostname: client
+    image: docker.io/teddysun/xray:25.8.3 # 1.8.24
+    ports:
+      - 1080:1080
+      - 1081:1081
+      - 3128:3128
+    restart: always
+    volumes:
+      - ./config.json:/etc/xray/config.json
