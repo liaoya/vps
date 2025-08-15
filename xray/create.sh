@@ -12,12 +12,13 @@ function print_usage() {
 Usage: $(basename "${BASH_SOURCE[0]}") OPTIONS
     -h, show the help
     -v, verbose mode
-    -d RUNTIME, the directory for running
+    -c, clean the previous. ${CLEAN:+the default is ${CLEAN}}
+    -d RUNTIME, the directory for running. ${RUNTIME:+the default is ${RUNTIME}}
     -f EVNFILE, The environment file. ${EVNFILE:+the default is ${EVNFILE}}
     -m MODE <server|client>, ${MODE:+the default is ${MODE}}
-    -n PREFIX, the prefix name will be used in RUNTIME directory
-    -p PROTOCOL <shadowsocks|vless>, xray protocol
-    -s STREAM [kcp|xhttp], xray stream
+    -n PREFIX, the prefix name will be used in RUNTIME directory. ${PREFIX:+the default is ${PREFIX}}
+    -p PROTOCOL <shadowsocks|vless>, xray protocol. ${PREFIX:+the default is ${PREFIX}}
+    -s STREAM [kcp|xhttp], xray stream. ${STREAM:+the default is ${STREAM}}
 Example:
 # Create environment with options generated
     $(basename "${BASH_SOURCE[0]}") -m server -p shadowsocks
@@ -30,14 +31,15 @@ EOF
 declare -A XRAY
 export XRAY
 
+CLEAN=${CLEAN:-0}
 EVNFILE=${EVNFILE:-"${ROOT_DIR}/.options"}
-MODE=${MODE:-}
-PREFIX=""
-PROTOCOL=${PROTOCOL:-}
-RUNTIME=""
+MODE=${MODE:-server}
+PREFIX=${PREFIX:-}
+PROTOCOL=${PROTOCOL:-vless}
+RUNTIME=${RUNTIME:-}
 STREAM=${STREAM:-}
 
-while getopts ":hvd:f:m:n:p:s:" opt; do
+while getopts ":hvcd:f:m:n:p:s:" opt; do
     case $opt in
     h)
         print_usage
@@ -46,6 +48,9 @@ while getopts ":hvd:f:m:n:p:s:" opt; do
     v)
         set -x
         export PS4='+(${BASH_SOURCE[0]}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+        ;;
+    c)
+        CLEAN=1
         ;;
     d)
         RUNTIME=$(readlink -f "${OPTARG}")
@@ -125,10 +130,14 @@ if [[ -z ${RUNTIME} ]]; then
 fi
 export RUNTIME=${ROOT_DIR}/${RUNTIME}
 
-mkdir -p "${RUNTIME}"
+if [[ -d "${RUNTIME}" && ${CLEAN} -eq 0 ]]; then
+    echo "${RUNTIME} exists"
+    exit 0
+fi
+rm -fr "${RUNTIME}" || true
+mkdir -p "${RUNTIME}" || true
 
 if [[ -f "${ROOT_DIR}/${XRAY[MODE]}/env.sh" ]]; then source "${ROOT_DIR}/${XRAY[MODE]}/env.sh"; fi
-mv "${XRAY[MODE]}/config.json" "${XRAY[MODE]}/docker-compose.yaml" "${RUNTIME}"/
 cp "${EVNFILE}" "${RUNTIME}"/.options
 cp "${ROOT_DIR}/run.sh" "${RUNTIME}"/
 
