@@ -131,8 +131,8 @@ if [[ -f "${ROOT_DIR}/pre.sh" ]]; then source "${ROOT_DIR}/pre.sh"; fi
 
 if [[ -z ${RUNTIME} ]]; then
     RUNTIME=${XRAY[PROTOCOL]}-${XRAY[STREAM]}-${XRAY[MODE]}
+    export RUNTIME=${ROOT_DIR}/${RUNTIME}
 fi
-export RUNTIME=${ROOT_DIR}/${RUNTIME}
 
 if [[ -d "${RUNTIME}" && ${CLEAN} -eq 0 ]]; then
     echo "${RUNTIME} exists"
