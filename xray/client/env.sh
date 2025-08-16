@@ -1,5 +1,8 @@
 #!/bin/bash
 
+THIS_FILE=$(readlink -f "${BASH_SOURCE[0]}")
+THIS_DIR=$(dirname "${THIS_FILE}")
+
 if [[ ! -f "${RUNTIME}/docker-compose.yaml" ]]; then
     cat <<EOF >"${RUNTIME}/docker-compose.yaml"
 ---
@@ -16,7 +19,7 @@ EOF
 fi
 
 if [[ ! -f "${RUNTIME}/config.json" ]]; then
-    cp "${RUNTIME}/client.tpl.json" "${RUNTIME}/config.json"
+    cp "${THIS_DIR}/client.tpl.json" "${RUNTIME}/config.json"
 
     jq . "${RUNTIME}/config.json" |
         jq --arg value "${XRAY[PROTOCOL]}" '.outbounds[2].protocol=$value' |

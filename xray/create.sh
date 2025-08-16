@@ -17,12 +17,13 @@ Usage: $(basename "${BASH_SOURCE[0]}") OPTIONS
     -f EVNFILE, The environment file. ${EVNFILE:+the default is ${EVNFILE}}
     -m MODE <server|client>, ${MODE:+the default is ${MODE}}
     -n PREFIX, the prefix name will be used in RUNTIME directory. ${PREFIX:+the default is ${PREFIX}}
-    -p PROTOCOL <shadowsocks|vless>, xray protocol. ${PREFIX:+the default is ${PREFIX}}
+    -p PROTOCOL <shadowsocks|vless>, xray protocol. ${PROTOCOL:+the default is ${PROTOCOL}}
     -s STREAM [kcp|xhttp], xray stream. ${STREAM:+the default is ${STREAM}}
 Example:
 # Create environment with options generated
-    $(basename "${BASH_SOURCE[0]}") -m server -p shadowsocks
+    $(basename "${BASH_SOURCE[0]}")
     $(basename "${BASH_SOURCE[0]}") -m server -p shadowsocks -s kcp
+    $(basename "${BASH_SOURCE[0]}") -m client
 # Use the current options to create environment
     $(basename "${BASH_SOURCE[0]}") -f .options
 EOF
@@ -32,12 +33,12 @@ declare -A XRAY
 export XRAY
 
 CLEAN=${CLEAN:-0}
-EVNFILE=${EVNFILE:-"${ROOT_DIR}/.options"}
+EVNFILE=${EVNFILE:-""}
 MODE=${MODE:-server}
-PREFIX=${PREFIX:-}
+PREFIX=${PREFIX:-$(hostname)}
 PROTOCOL=${PROTOCOL:-vless}
 RUNTIME=${RUNTIME:-}
-STREAM=${STREAM:-}
+STREAM=${STREAM:-xhttp}
 
 while getopts ":hvcd:f:m:n:p:s:" opt; do
     case $opt in
@@ -59,16 +60,16 @@ while getopts ":hvcd:f:m:n:p:s:" opt; do
         EVNFILE=$(readlink -f "${OPTARG}")
         ;;
     m)
-        MODE=${OPTARG}
+        MODE=${OPTARG,,}
         ;;
     n)
         PREFIX=${OPTARG}
         ;;
     p)
-        PROTOCOL=${OPTARG}
+        PROTOCOL=${OPTARG,,}
         ;;
     s)
-        STREAM=${OPTARG}
+        STREAM=${OPTARG,,}
         ;;
     \?)
         print_usage
@@ -82,11 +83,6 @@ if [[ $# -eq 0 ]]; then
     exit 1
 fi
 
-if [[ ! -e ${EVNFILE} ]]; then
-    touch "${EVNFILE}"
-else
-    source "${EVNFILE}"
-fi
 for key in MODE PROTOCOL STREAM; do
     if [[ -n ${!key} ]]; then
         export ${key}=${!key}
@@ -107,6 +103,18 @@ for _var in "${_variables[@]}"; do
         exit 1
     fi
 done
+if [[ -z ${EVNFILE} ]]; then
+    EVNFILE=${ROOT_DIR}/.${PREFIX}-${PROTOCOL}-${STREAM}.options
+fi
+if [[ ${MODE} == client && ! -e ${EVNFILE} ]]; then
+    echo "${EVNFILE} must exist for ${MODE}"
+    exit 1
+fi
+if [[ ! -e ${EVNFILE} ]]; then
+    touch "${EVNFILE}"
+else
+    source "${EVNFILE}"
+fi
 
 _commands=(docker jq sponge yq)
 for _cmd in "${_commands[@]}"; do
@@ -123,10 +131,7 @@ fi
 if [[ -f "${ROOT_DIR}/pre.sh" ]]; then source "${ROOT_DIR}/pre.sh"; fi
 
 if [[ -z ${RUNTIME} ]]; then
-    RUNTIME=${XRAY[PROTOCOL]}
-    if [[ ${PREFIX} ]]; then RUNTIME=${PREFIX}-${RUNTIME}; fi
-    if [[ -n ${STREAM} ]]; then RUNTIME=${RUNTIME}-${STREAM}; fi
-    RUNTIME=${RUNTIME}-${XRAY[MODE]}
+    RUNTIME=${XRAY[PROTOCOL]}-${XRAY[STREAM]}-${XRAY[MODE]}
 fi
 export RUNTIME=${ROOT_DIR}/${RUNTIME}
 
