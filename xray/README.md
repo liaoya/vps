@@ -1,41 +1,68 @@
-# XRAY VLESS
+# XRAY Configuration
 
 The script demand the following tools
 
 - `docker`
-- `docker-compose`
+- `docker compose` plugin
 - `jq`
+- `yq`
+
+## Create Server
+
+Create configuration, `create.sh` will create a directory e.g. `vless-xhttp-server` and file `.vless-xhttp.options` (to create client)
 
 ```bash
-rm -f .options
-export SERVER=
+export VLESS_ID=$(cat /proc/sys/kernel/random/uuid)
 
-# shadowsocks
-# Initial the options files
-bash create.sh -m server -p shadowsocks
-bash create.sh -m server -p shadowsocks -s kcp
+# vless + xhttp,
+./create.sh
 
-bash create.sh -m server -f .raksmart.shadowsocks.options
-bash create.sh -m client -f .raksmart.shadowsocks.options
+# vless + mkcp
+./create.sh -s kcp
 
-# vless
-# Initial the options files
-rm -f .options
-bash create.sh -m server -p vless
-rm -f .options
-env KCP_SEED= XRAY_VERSION=v1.8.24 bash create.sh -m server -p vless -s kcp -f vlkcp.options
-rm -fr .options
-env QUIC_KEY= XRAY_VERSION=v1.8.24 bash create.sh -m server -p vless -s quic -f vlquic.options
+env KCP_SEED= ./create.sh -s kcp
 
-# vmess
-bash create.sh -m server -p vmess
-bash create.sh -m server -p vmess -s kcp
+# shadowsocks + xhttp
+./create.sh -p shadowsocks
 
-# Use the existing option file
-bash create.sh -f .vless-kcp-server.options -m server -p vless -s kcp
-bash create.sh -f .vless-quic-server.options -m server -p vless -s quic
+env SHADOWSOCKS_METHOD=aes-128-gcm SHADOWSOCKS_PASSWORD= ./create.sh -p shadowsocks
+
+# shadowsocks + mkcp
+./create.sh -p shadowsocks -s kcp
+
+env KCP_SEED= SHADOWSOCKS_METHOD=aes-128-gcm SHADOWSOCKS_PASSWORD= ./create.sh -p shadowsocks -s kcp
+
+# use option file
+./create.sh -f .vless-xhttp.options
+
+ENV PREFIX=$(hostname) ./create.sh
+```
+
+## Run Server
+
+In the directory, e.g. `vless-xhttp-server`, run
+
+```sh
+./run.sh start
+```
+
+## Create Client
+
+The following command will create a directory e.g. `vless-xhttp-client`
+
+```sh
+./create.sh -m client -f .vless-xhttp.options
+```
+
+## Run Server
+
+In the directory, e.g. `vless-xhttp-client`, run
+
+```sh
+./run.sh start
 ```
 
 ## Reference
 
 - <https://github.com/XTLS/Xray-examples>
+- <https://github.com/chika0801/Xray-examples>

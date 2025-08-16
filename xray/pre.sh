@@ -76,13 +76,9 @@ if [[ ${STREAM} == kcp ]]; then
     _read_param kcp_congestion false
     _read_param kcp_header_type dtls
     _read_param kcp_mtu 1350
+    _read_param kcp_seed "$(tr -cd '[:alnum:]' </dev/urandom | fold -w15 | head -n1)"
     _read_param kcp_server_down_capacity 200
     _read_param kcp_server_up_capacity 200
-    if [[ ${PROTOCOL} != shadowsocks ]]; then
-        _read_param kcp_seed "$(tr -cd '[:alnum:]' </dev/urandom | fold -w15 | head -n1)"
-    else
-        _read_param kcp_seed ""
-    fi
 fi
 
 if [[ ${STREAM} == quic ]]; then

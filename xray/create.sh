@@ -33,9 +33,9 @@ declare -A XRAY
 export XRAY
 
 CLEAN=${CLEAN:-0}
-EVNFILE=${EVNFILE:-""}
+EVNFILE=${EVNFILE:-}
 MODE=${MODE:-server}
-PREFIX=${PREFIX:-$(hostname)}
+PREFIX=${PREFIX:-}
 PROTOCOL=${PROTOCOL:-vless}
 RUNTIME=${RUNTIME:-}
 STREAM=${STREAM:-xhttp}
@@ -78,11 +78,6 @@ while getopts ":hvcd:f:m:n:p:s:" opt; do
     esac
 done
 
-if [[ $# -eq 0 ]]; then
-    print_usage
-    exit 1
-fi
-
 for key in MODE PROTOCOL STREAM; do
     if [[ -n ${!key} ]]; then
         export ${key}=${!key}
@@ -104,7 +99,11 @@ for _var in "${_variables[@]}"; do
     fi
 done
 if [[ -z ${EVNFILE} ]]; then
-    EVNFILE=${ROOT_DIR}/.${PREFIX}-${PROTOCOL}-${STREAM}.options
+    if [[ -n ${PREFIX} ]]; then
+        EVNFILE=${ROOT_DIR}/.${PREFIX}-${PROTOCOL}-${STREAM}.options
+    else
+        EVNFILE=${ROOT_DIR}/.${PROTOCOL}-${STREAM}.options
+    fi
 fi
 if [[ ${MODE} == client && ! -e ${EVNFILE} ]]; then
     echo "${EVNFILE} must exist for ${MODE}"
