@@ -9,6 +9,7 @@ if [[ ! -f "${RUNTIME}/docker-compose.yaml" ]]; then
 services:
   client:
     image: docker.io/teddysun/xray:${XRAY[VERSION]:1}
+    container_name: xray-${XRAY[PROTOCOL]}-${XRAY[STREAM]}-${XRAY[MODE]}
     ports:
       - 1080:1080
       - 1081:1081

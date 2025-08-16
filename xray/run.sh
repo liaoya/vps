@@ -63,9 +63,10 @@ while getopts ":hvl:" opt; do
 done
 shift $((OPTIND - 1))
 
-for cmd in docker jq sponge yq; do
-    if ! command -v "${cmd}" 1>/dev/null 2>&1; then
-        echo "${cmd} is required"
+_commands=(docker jq sponge yq)
+for _cmd in "${_commands[@]}"; do
+    if ! command -v "${_cmd}" 1>/dev/null 2>&1; then
+        echo "${_commands[@]}" "are required and ${_cmd} is missing"
         exit 1
     fi
 done
@@ -76,11 +77,6 @@ for item in config.json docker-compose.yaml; do
         exit 1
     fi
 done
-
-COMPOSE_PROJECT_NAME=xray-$(basename "${_THIS_DIR}")
-COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME/-server/}
-COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME/-client/}
-export COMPOSE_PROJECT_NAME
 
 declare -A XRAY
 export XRAY
@@ -98,9 +94,6 @@ fi
 
 if [[ ${1} == clean ]]; then
     docker compose -f "${_THIS_DIR}/docker-compose.yaml" down -v
-    while IFS= read -r _container; do
-        docker container rm -f -v "${_container}"
-    done < <(docker ps -a --format '{{.Names}}' | grep -E "^${COMPOSE_PROJECT_NAME}")
     _delete_firewall_port "${XRAY[PORT]}"
 elif [[ ${1} == start ]]; then
     docker compose -f "${_THIS_DIR}/docker-compose.yaml" up -d
