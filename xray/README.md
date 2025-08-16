@@ -62,6 +62,13 @@ In the directory, e.g. `vless-xhttp-client`, run
 ./run.sh start
 ```
 
+## All in One
+
+```sh
+rm -fr .*.options *-server *-client
+env KCP_SEED= SHADOWSOCKS_METHOD= ./create-all-in-one-server.sh
+```
+
 ## Reference
 
 - <https://github.com/XTLS/Xray-examples>

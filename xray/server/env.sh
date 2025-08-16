@@ -35,11 +35,11 @@ if [[ ! -f "${RUNTIME}/config.json" ]]; then
 EOF
 
     if [[ ${PROTOCOL} == shadowsocks ]]; then
-        yq -i '.services.server.ports += "'"${XRAY[PORT]}":8388'/tcp"' "${RUNTIME}/docker-compose.yaml"
-        yq -i '.services.server.ports += "'"${XRAY[PORT]}":8388'/udp"' "${RUNTIME}/docker-compose.yaml"
+        yq -i '.services.server.ports += "'"${XRAY[PORT]}":"${XRAY[PORT]}"'/tcp"' "${RUNTIME}/docker-compose.yaml"
+        yq -i '.services.server.ports += "'"${XRAY[PORT]}":"${XRAY[PORT]}"'/udp"' "${RUNTIME}/docker-compose.yaml"
 
         jq . "${RUNTIME}/config.json" |
-            jq ".inbounds[0].port=8388" |
+            jq ".inbounds[0].port=${XRAY[PORT]}" |
             jq --arg value "${XRAY[SHADOWSOCKS_METHOD]}" '.inbounds[0].settings.method=$value' |
             jq --arg value "${XRAY[SHADOWSOCKS_PASSWORD]}" '.inbounds[0].settings.password=$value' |
             jq --arg value "${XRAY[SHADOWSOCKS_NETWORK]}" '.inbounds[0].settings.network=$value' |
