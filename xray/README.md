@@ -66,7 +66,7 @@ In the directory, e.g. `vless-xhttp-client`, run
 
 ```sh
 rm -fr .*.options *-server *-client
-env KCP_SEED= SHADOWSOCKS_METHOD= ./create-all-in-one-server.sh
+env KCP_SEED= SHADOWSOCKS_PASSWORD= ./create-all-in-one-server.sh
 ```
 
 ## Reference
