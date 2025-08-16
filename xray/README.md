@@ -7,6 +7,11 @@ The script demand the following tools
 - `jq`
 - `yq`
 
+TODO
+
+- change network for shadowsocks
+- remove shadowsocks password as kcp and xhttp has been encrypted already
+
 ## Create Server
 
 Create configuration, `create.sh` will create a directory e.g. `vless-xhttp-server` and file `.vless-xhttp.options` (to create client)

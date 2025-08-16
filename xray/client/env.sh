@@ -76,9 +76,9 @@ if [[ ! -f "${RUNTIME}/config.json" ]]; then
             jq --argjson value "${XRAY[KCP_CLIENT_DOWN_CAPACITY]}" '.outbounds[2].streamSettings.kcpSettings.downlinkCapacity=$value' |
             jq --argjson value "${XRAY[KCP_MTU]}" '.outbounds[2].streamSettings.kcpSettings.mtu=$value' |
             jq --argjson value "${XRAY[KCP_CLIENT_UP_CAPACITY]}" '.outbounds[2].streamSettings.kcpSettings.uplinkCapacity=$value' |
-            jq '.outbounds[2].streamSettings.kcpSettings.readBufferSize=5' |
+            jq '.outbounds[2].streamSettings.kcpSettings.readBufferSize=10' |
             jq '.outbounds[2].streamSettings.kcpSettings.tti=30' |
-            jq '.outbounds[2].streamSettings.kcpSettings.writeBufferSize=5' |
+            jq '.outbounds[2].streamSettings.kcpSettings.writeBufferSize=10' |
             jq '.outbounds[2].streamSettings.network="kcp"' |
             jq -S . |
             sponge "${RUNTIME}/config.json"
