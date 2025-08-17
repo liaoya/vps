@@ -9,12 +9,6 @@ export PS4='+(${BASH_SOURCE[0]}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 THIS_DIR=$(readlink -f "${BASH_SOURCE[0]}")
 THIS_DIR=$(dirname "${THIS_DIR}")
 
-export KCP_SEED=${KCP_SEED:-"$(tr -cd '[:alnum:]' </dev/urandom | fold -w10 | head -n1)"}
-export PREFIX=${PREFIX:-$(hostname)}
-export SHADOWSOCKS_METHOD=${SHADOWSOCKS_METHOD:-aes-128-gcm}
-export SHADOWSOCKS_PASSWORD=${SHADOWSOCKS_PASSWORD:-"$(tr -cd '[:alnum:]' </dev/urandom | fold -w10 | head -n1)"}
-export VLESS_ID=${VLESS_ID:-$(cat /proc/sys/kernel/random/uuid)}
-
 _commands=(docker jq sponge yq)
 for _cmd in "${_commands[@]}"; do
     if ! command -v "${_cmd}" 1>/dev/null 2>&1; then

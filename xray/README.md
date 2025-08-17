@@ -25,17 +25,17 @@ export VLESS_ID=$(cat /proc/sys/kernel/random/uuid)
 # vless + mkcp
 ./create.sh -s kcp
 
-env KCP_SEED= ./create.sh -s kcp
+KCP_SEED= ./create.sh -s kcp
 
 # shadowsocks + xhttp
 ./create.sh -p shadowsocks
 
-env SHADOWSOCKS_METHOD=aes-128-gcm SHADOWSOCKS_PASSWORD= ./create.sh -p shadowsocks
+SHADOWSOCKS_METHOD=aes-128-gcm SHADOWSOCKS_PASSWORD= ./create.sh -p shadowsocks
 
 # shadowsocks + mkcp
 ./create.sh -p shadowsocks -s kcp
 
-env KCP_SEED= SHADOWSOCKS_METHOD=aes-128-gcm SHADOWSOCKS_PASSWORD= ./create.sh -p shadowsocks -s kcp
+KCP_SEED= SHADOWSOCKS_METHOD=aes-128-gcm SHADOWSOCKS_PASSWORD= VLESS_ID= ./create.sh -p shadowsocks -s kcp
 
 # use option file
 ./create.sh -f .vless-xhttp.options
@@ -69,9 +69,19 @@ In the directory, e.g. `vless-xhttp-client`, run
 
 ## All in One
 
+- Run `./create-all-in-one-server.sh` to create the server with the existing `.options` file
+- Run the following to create the new server
+
 ```sh
 rm -fr .*.options *-server *-client
-env KCP_SEED= SHADOWSOCKS_PASSWORD= ./create-all-in-one-server.sh
+
+export KCP_SEED=${KCP_SEED:-"$(tr -cd '[:alnum:]' </dev/urandom | fold -w10 | head -n1)"}
+export PREFIX=${PREFIX:-$(hostname)}
+export SHADOWSOCKS_METHOD=${SHADOWSOCKS_METHOD:-aes-128-gcm}
+export SHADOWSOCKS_PASSWORD=${SHADOWSOCKS_PASSWORD:-"$(tr -cd '[:alnum:]' </dev/urandom | fold -w10 | head -n1)"}
+export VLESS_ID=${VLESS_ID:-$(cat /proc/sys/kernel/random/uuid)}
+
+./create-all-in-one-server.sh
 ```
 
 ## Reference
