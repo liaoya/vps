@@ -93,6 +93,18 @@ for _var in "${_variables[@]}"; do
         exit 1
     fi
 done
+
+if [[ -z ${RUNTIME} ]]; then
+    RUNTIME=${XRAY[PROTOCOL]}-${XRAY[STREAM]}-${XRAY[MODE]}
+    export RUNTIME=${ROOT_DIR}/${RUNTIME}
+fi
+if [[ -d "${RUNTIME}" && ${CLEAN} -eq 0 ]]; then
+    echo "${RUNTIME} exists"
+    exit 1
+fi
+rm -fr "${RUNTIME}" || true
+mkdir -p "${RUNTIME}" || true
+
 if [[ -z ${EVNFILE} ]]; then
     EVNFILE=${ROOT_DIR}/.$(hostname)-${PROTOCOL}-${STREAM}.options
 fi
@@ -119,18 +131,6 @@ if [[ -z ${MODE} || -z ${PROTOCOL} ]]; then
     exit 1
 fi
 if [[ -f "${ROOT_DIR}/pre.sh" ]]; then source "${ROOT_DIR}/pre.sh"; fi
-
-if [[ -z ${RUNTIME} ]]; then
-    RUNTIME=${XRAY[PROTOCOL]}-${XRAY[STREAM]}-${XRAY[MODE]}
-    export RUNTIME=${ROOT_DIR}/${RUNTIME}
-fi
-
-if [[ -d "${RUNTIME}" && ${CLEAN} -eq 0 ]]; then
-    echo "${RUNTIME} exists"
-    exit 0
-fi
-rm -fr "${RUNTIME}" || true
-mkdir -p "${RUNTIME}" || true
 
 if [[ -f "${ROOT_DIR}/${XRAY[MODE]}/env.sh" ]]; then source "${ROOT_DIR}/${XRAY[MODE]}/env.sh"; fi
 cp "${EVNFILE}" "${RUNTIME}"/.options
