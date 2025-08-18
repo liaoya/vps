@@ -40,13 +40,6 @@ if [[ ! -f "${RUNTIME}/config.json" ]]; then
     "rules": [
       {
         "type": "field",
-        "ip": [
-          "geoip:private"
-        ],
-        "outboundTag": "block"
-      },
-      {
-        "type": "field",
         "ip": ["geoip:cn"],
         "outboundTag": "block"
       },

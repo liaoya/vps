@@ -16,7 +16,6 @@ Usage: $(basename "${BASH_SOURCE[0]}") OPTIONS
     -d RUNTIME, the directory for running. ${RUNTIME:+the default is ${RUNTIME}}
     -f EVNFILE, The environment file. ${EVNFILE:+the default is ${EVNFILE}}
     -m MODE <server|client>, ${MODE:+the default is ${MODE}}
-    -n PREFIX, the prefix name will be used in RUNTIME directory. ${PREFIX:+the default is ${PREFIX}}
     -p PROTOCOL <shadowsocks|vless>, xray protocol. ${PROTOCOL:+the default is ${PROTOCOL}}
     -s STREAM [kcp|xhttp], xray stream. ${STREAM:+the default is ${STREAM}}
 Example:
@@ -35,12 +34,11 @@ export XRAY
 CLEAN=${CLEAN:-0}
 EVNFILE=${EVNFILE:-}
 MODE=${MODE:-server}
-PREFIX=${PREFIX:-}
 PROTOCOL=${PROTOCOL:-vless}
 RUNTIME=${RUNTIME:-}
 STREAM=${STREAM:-xhttp}
 
-while getopts ":hvcd:f:m:n:p:s:" opt; do
+while getopts ":hvcd:f:m:p:s:" opt; do
     case $opt in
     h)
         print_usage
@@ -61,9 +59,6 @@ while getopts ":hvcd:f:m:n:p:s:" opt; do
         ;;
     m)
         MODE=${OPTARG,,}
-        ;;
-    n)
-        PREFIX=${OPTARG}
         ;;
     p)
         PROTOCOL=${OPTARG,,}
@@ -99,11 +94,7 @@ for _var in "${_variables[@]}"; do
     fi
 done
 if [[ -z ${EVNFILE} ]]; then
-    if [[ -n ${PREFIX} ]]; then
-        EVNFILE=${ROOT_DIR}/.${PREFIX}-${PROTOCOL}-${STREAM}.options
-    else
-        EVNFILE=${ROOT_DIR}/.${PROTOCOL}-${STREAM}.options
-    fi
+    EVNFILE=${ROOT_DIR}/.$(hostname)-${PROTOCOL}-${STREAM}.options
 fi
 if [[ ${MODE} == client && ! -e ${EVNFILE} ]]; then
     echo "${EVNFILE} must exist for ${MODE}"
