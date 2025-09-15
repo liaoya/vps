@@ -33,10 +33,10 @@ export XRAY
 
 CLEAN=${CLEAN:-0}
 EVNFILE=${EVNFILE:-}
-MODE=${MODE:-server}
-PROTOCOL=${PROTOCOL:-vless}
+MODE=${MODE:-}
+PROTOCOL=${PROTOCOL:-}
 RUNTIME=${RUNTIME:-}
-STREAM=${STREAM:-xhttp}
+STREAM=${STREAM:-}
 
 while getopts ":hvcd:f:m:p:s:" opt; do
     case $opt in
@@ -73,6 +73,19 @@ while getopts ":hvcd:f:m:p:s:" opt; do
     esac
 done
 
+if [[ -z ${EVNFILE} ]]; then
+    EVNFILE=${ROOT_DIR}/.$(hostname)-${PROTOCOL}-${STREAM}.options
+fi
+if [[ ${MODE} == client && ! -e ${EVNFILE} ]]; then
+    echo "${EVNFILE} must exist for ${MODE}"
+    exit 1
+fi
+if [[ ! -e ${EVNFILE} ]]; then
+    touch "${EVNFILE}"
+else
+    source "${EVNFILE}"
+fi
+
 for key in MODE PROTOCOL STREAM; do
     if [[ -n ${!key} ]]; then
         export ${key}=${!key}
@@ -95,7 +108,7 @@ for _var in "${_variables[@]}"; do
 done
 
 if [[ -z ${RUNTIME} ]]; then
-    RUNTIME=${XRAY[PROTOCOL]}-${XRAY[STREAM]}-${XRAY[MODE]}
+    RUNTIME=${PROTOCOL}-${STREAM}-${MODE}
     export RUNTIME=${ROOT_DIR}/${RUNTIME}
 fi
 if [[ -d "${RUNTIME}" && ${CLEAN} -eq 0 ]]; then
@@ -104,19 +117,6 @@ if [[ -d "${RUNTIME}" && ${CLEAN} -eq 0 ]]; then
 fi
 rm -fr "${RUNTIME}" || true
 mkdir -p "${RUNTIME}" || true
-
-if [[ -z ${EVNFILE} ]]; then
-    EVNFILE=${ROOT_DIR}/.$(hostname)-${PROTOCOL}-${STREAM}.options
-fi
-if [[ ${MODE} == client && ! -e ${EVNFILE} ]]; then
-    echo "${EVNFILE} must exist for ${MODE}"
-    exit 1
-fi
-if [[ ! -e ${EVNFILE} ]]; then
-    touch "${EVNFILE}"
-else
-    source "${EVNFILE}"
-fi
 
 _commands=(docker jq sponge yq)
 for _cmd in "${_commands[@]}"; do

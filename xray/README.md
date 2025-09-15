@@ -12,6 +12,8 @@ TODO
 - change network for shadowsocks
 - remove shadowsocks password as kcp and xhttp has been encrypted already
 
+`v25.8.3` and `v25.9.11` work with kcp and `v25.9.5` not
+
 ## Create Server
 
 Create configuration, `create.sh` will create a directory e.g. `vless-xhttp-server` and file `.vless-xhttp.options` (to create client)
