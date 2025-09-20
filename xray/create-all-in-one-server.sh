@@ -17,10 +17,10 @@ for _cmd in "${_commands[@]}"; do
     fi
 done
 
-"${THIS_DIR}"/create.sh || true
-"${THIS_DIR}"/create.sh -s kcp || true
-"${THIS_DIR}"/create.sh -p shadowsocks || true
-"${THIS_DIR}"/create.sh -p shadowsocks -s kcp || true
+"${THIS_DIR}"/create.sh -m server -p vless -s xhttp || true
+"${THIS_DIR}"/create.sh -m server -p vless -s kcp || true
+"${THIS_DIR}"/create.sh -m server -p vless -p shadowsocks -s xhttp || true
+"${THIS_DIR}"/create.sh -m server -p shadowsocks -s kcp || true
 
 RUNTIME="${THIS_DIR}"/all-in-one-server
 mkdir -p "${RUNTIME}" || true

@@ -94,10 +94,13 @@ elif [[ ${VERSION} -eq 2004 ]]; then
     # ppa:mtvoid/ppa for emacs27
     # ppa:mjuhasz/backports for tmux 3.1b
     ppa_repos+=(ppa:savoury1/backports)
-    ppa_repos+=(ppa:ansible/ansible ppa:fish-shell/release-3 ppa:jonathonf/vim ppa:kelebek333/xfce-4.16 ppa:mjuhasz/backports)
+    ppa_repos+=(ppa:ansible/ansible ppa:fish-shell/release-4 ppa:jonathonf/vim ppa:kelebek333/xfce-4.16 ppa:mjuhasz/backports)
 elif [[ ${VERSION} -eq 2204 ]]; then
     ppa_repos+=(ppa:savoury1/backports)
-    ppa_repos+=(ppa:fish-shell/release-3 ppa:jonathonf/vim)
+    ppa_repos+=(ppa:fish-shell/release-4 ppa:jonathonf/vim)
+elif [[ ${VERSION} -eq 2404 ]]; then
+    ppa_repos+=(ppa:savoury1/backports)
+    ppa_repos+=(ppa:fish-shell/release-4 ppa:jonathonf/vim)
 fi
 for ppa in "${ppa_repos[@]}"; do add-apt-repository -y "$ppa"; done
 
@@ -305,7 +308,7 @@ EOF
     source ~/.bashrc
 fi
 
-cat <<'EOF' > "${HOME}/.tmux.conf"
+cat <<'EOF' | sudo tee /etc/tmux.conf
 bind-key C-m set-option -g mouse \; display-message "Mouse #{?mouse,on,off}"
 set -g buffer-limit 10000
 set -g default-shell /usr/bin/fish
