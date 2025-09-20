@@ -19,7 +19,7 @@ done
 
 "${THIS_DIR}"/create.sh -m server -p vless -s xhttp || true
 "${THIS_DIR}"/create.sh -m server -p vless -s kcp || true
-"${THIS_DIR}"/create.sh -m server -p vless -p shadowsocks -s xhttp || true
+"${THIS_DIR}"/create.sh -m server -p shadowsocks -s xhttp || true
 "${THIS_DIR}"/create.sh -m server -p shadowsocks -s kcp || true
 
 RUNTIME="${THIS_DIR}"/all-in-one-server
