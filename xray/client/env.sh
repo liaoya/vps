@@ -68,7 +68,6 @@ if [[ ! -f "${RUNTIME}/config.json" ]]; then
     fi
 
     if [[ ${STREAM} == kcp ]]; then
-        if [[ ${PROTOCOL} == shadowsocks ]]; then XRAY[KCP_SEED]=""; fi
         jq . "${RUNTIME}/config.json" |
             jq --arg value "${XRAY[KCP_HEADER_TYPE]}" '.outbounds[2].streamSettings.kcpSettings.header.type=$value' |
             jq --arg value "${XRAY[KCP_SEED]}" '.outbounds[2].streamSettings.kcpSettings.seed=$value' |
@@ -82,6 +81,11 @@ if [[ ! -f "${RUNTIME}/config.json" ]]; then
             jq '.outbounds[2].streamSettings.network="kcp"' |
             jq -S . |
             sponge "${RUNTIME}/config.json"
+        # decrease encrypt and save resouces
+        if [[ ${PROTOCOL} == shadowsocks ]]; then
+            jq 'del(.outbounds[2].streamSettings.kcpSettings.seed)' "${RUNTIME}/config.json" |
+                sponge "${RUNTIME}/config.json"
+        fi
     fi
 
     if [[ ${STREAM} == quic ]]; then

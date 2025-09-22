@@ -101,7 +101,6 @@ EOF
 
     if [[ ${STREAM} == kcp ]]; then
         # yq -i 'del(.services.server.ports[0])' "${RUNTIME}/docker-compose.yaml"
-        if [[ ${PROTOCOL} == shadowsocks ]]; then XRAY[KCP_SEED]=""; fi
         jq . "${RUNTIME}/config.json" |
             jq --arg value "${XRAY[KCP_HEADER_TYPE]}" '.inbounds[0].streamSettings.kcpSettings.header.type=$value' |
             jq --arg value "${XRAY[KCP_SEED]}" '.inbounds[0].streamSettings.kcpSettings.seed=$value' |
@@ -115,6 +114,11 @@ EOF
             jq '.inbounds[0].streamSettings.network="kcp"' |
             jq -S . |
             sponge "${RUNTIME}/config.json"
+        # decrease encrypt and save resouces
+        if [[ ${PROTOCOL} == shadowsocks ]]; then
+            jq 'del(.inbounds[0].streamSettings.kcpSettings.seed)' "${RUNTIME}/config.json" |
+                sponge "${RUNTIME}/config.json"
+        fi
     fi
 
     # xray newer than 1.8.24 does not support quic anymore
