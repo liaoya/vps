@@ -10,9 +10,7 @@ The script demand the following tools
 TODO
 
 - change network for shadowsocks
-- remove shadowsocks password as kcp and xhttp has been encrypted already
-
-`v25.8.3` and `v25.9.11` work with kcp and `v25.9.5` not
+- remove kcp seed for shadowsocks
 
 ## Create Server
 
@@ -22,27 +20,19 @@ Create configuration, `create.sh` will create a directory e.g. `vless-xhttp-serv
 export VLESS_ID=$(cat /proc/sys/kernel/random/uuid)
 
 # vless + xhttp,
-./create.sh
+./create.sh -m server -p vless -s xhttp
 
 # vless + mkcp
-./create.sh -s kcp
-
-KCP_SEED= ./create.sh -s kcp
+KCP_SEED= ./create.sh -m server -p vless -s kcp
 
 # shadowsocks + xhttp
-./create.sh -p shadowsocks
-
-SHADOWSOCKS_METHOD=aes-128-gcm SHADOWSOCKS_PASSWORD= ./create.sh -p shadowsocks
+SHADOWSOCKS_METHOD=aes-128-gcm SHADOWSOCKS_PASSWORD= ./create.sh -m server -p shadowsocks -s xhttp
 
 # shadowsocks + mkcp
-./create.sh -p shadowsocks -s kcp
-
-KCP_SEED= SHADOWSOCKS_METHOD=aes-128-gcm SHADOWSOCKS_PASSWORD= VLESS_ID= ./create.sh -p shadowsocks -s kcp
+SHADOWSOCKS_METHOD=aes-256-gcm SHADOWSOCKS_PASSWORD= ./create.sh -m server -p shadowsocks -s kcp
 
 # use option file
 ./create.sh -f .vless-xhttp.options
-
-ENV PREFIX=$(hostname) ./create.sh
 ```
 
 ## Run Server
@@ -61,7 +51,7 @@ The following command will create a directory e.g. `vless-xhttp-client`
 ./create.sh -m client -f .vless-xhttp.options
 ```
 
-## Run Server
+## Run Client
 
 In the directory, e.g. `vless-xhttp-client`, run
 

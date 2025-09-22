@@ -68,7 +68,7 @@ if [[ ! -f "${RUNTIME}/config.json" ]]; then
     fi
 
     if [[ ${STREAM} == kcp ]]; then
-        # if [[ ${PROTOCOL} == shadowsocks ]]; then XRAY[KCP_SEED]=""; fi
+        if [[ ${PROTOCOL} == shadowsocks ]]; then XRAY[KCP_SEED]=""; fi
         jq . "${RUNTIME}/config.json" |
             jq --arg value "${XRAY[KCP_HEADER_TYPE]}" '.outbounds[2].streamSettings.kcpSettings.header.type=$value' |
             jq --arg value "${XRAY[KCP_SEED]}" '.outbounds[2].streamSettings.kcpSettings.seed=$value' |

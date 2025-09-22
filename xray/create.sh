@@ -19,10 +19,14 @@ Usage: $(basename "${BASH_SOURCE[0]}") OPTIONS
     -p PROTOCOL <shadowsocks|vless>, xray protocol. ${PROTOCOL:+the default is ${PROTOCOL}}
     -s STREAM [kcp|xhttp], xray stream. ${STREAM:+the default is ${STREAM}}
 Example:
-# Create environment with options generated
-    $(basename "${BASH_SOURCE[0]}")
-    $(basename "${BASH_SOURCE[0]}") -m server -p shadowsocks -s kcp
-    $(basename "${BASH_SOURCE[0]}") -m client
+# Create the server
+    $(basename "${BASH_SOURCE[0]}") -h
+    SHADOWSOCKS_METHOD=aes-256-gcm SHADOWSOCKS_PASSWORD= $(basename "${BASH_SOURCE[0]}") -m server -p shadowsocks -s kcp
+    SHADOWSOCKS_METHOD=aes-128-gcm SHADOWSOCKS_PASSWORD= $(basename "${BASH_SOURCE[0]}") -m server -p shadowsocks -s xhttp
+    VLESS_ID=$(cat /proc/sys/kernel/random/uuid) KCP_SEED= $(basename "${BASH_SOURCE[0]}") -m server -p vless -s kcp
+    VLESS_ID=$(cat /proc/sys/kernel/random/uuid) $(basename "${BASH_SOURCE[0]}") -m server -p vless -s xhttp
+# Create the client
+    $(basename "${BASH_SOURCE[0]}") -m client -f <option file>
 # Use the current options to create environment
     $(basename "${BASH_SOURCE[0]}") -f .options
 EOF
