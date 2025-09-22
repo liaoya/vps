@@ -63,7 +63,7 @@ EOF
             jq ".inbounds[0].port=${XRAY[PORT]}" |
             jq --arg value "${XRAY[SHADOWSOCKS_METHOD]}" '.inbounds[0].settings.method=$value' |
             jq --arg value "${XRAY[SHADOWSOCKS_PASSWORD]}" '.inbounds[0].settings.password=$value' |
-            jq '.inbounds[0].settings.network="tcp,udp"' |
+            jq '.inbounds[0].settings.network="tcp"' |
             jq -S . |
             sponge "${RUNTIME}/config.json"
         if [[ ${XRAY[SHADOWSOCKS_METHOD]} == 2022-blake3* ]]; then

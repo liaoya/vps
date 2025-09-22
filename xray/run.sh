@@ -63,6 +63,11 @@ while getopts ":hvl:" opt; do
 done
 shift $((OPTIND - 1))
 
+if [[ $# -ne 1 ]]; then
+    print_usage
+    exit 1
+fi
+
 _commands=(docker jq sponge yq)
 for _cmd in "${_commands[@]}"; do
     if ! command -v "${_cmd}" 1>/dev/null 2>&1; then
