@@ -151,14 +151,14 @@ sudo systemctl daemon-reload
 sudo systemctl restart systemd-journald.service
 sudo journalctl --disk-usage
 
-ufw default deny incoming
-ufw default allow outgoing
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
 
-ufw allow ssh
-ufw status
+sudo ufw allow ssh
+sudo ufw status
 # Make sure ssh is allowed
-ufw enable
-ufw status
+sudo ufw enable
+sudo ufw status
 ```
 
 ```bash

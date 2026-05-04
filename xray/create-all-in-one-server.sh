@@ -24,7 +24,7 @@ done
 
 RUNTIME="${THIS_DIR}"/all-in-one-server
 mkdir -p "${RUNTIME}" || true
-cp "${THIS_DIR}"/run.sh "${THIS_DIR}"/.*.options "${THIS_DIR}"/vless-xhttp-server/docker-compose.yaml "${THIS_DIR}"/vless-xhttp-server/config.json "${THIS_DIR}"/vless-xhttp-server/xray* "${RUNTIME}"/
+cp "${THIS_DIR}"/run.sh "${THIS_DIR}"/.*.env "${THIS_DIR}"/vless-xhttp-server/docker-compose.yaml "${THIS_DIR}"/vless-xhttp-server/config.json "${THIS_DIR}"/vless-xhttp-server/xray* "${RUNTIME}"/
 
 jq '.inbounds = []' "${RUNTIME}/config.json" | sponge "${RUNTIME}/config.json"
 yq -i '.services.server.ports=[]' "${RUNTIME}/docker-compose.yaml"

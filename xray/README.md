@@ -14,7 +14,7 @@ TODO
 
 ## Create Server
 
-Create configuration, `create.sh` will create a directory e.g. `vless-xhttp-server` and file `.vless-xhttp.options` (to create client)
+Create configuration, `create.sh` will create a directory e.g. `vless-xhttp-server` and file `.vless-xhttp.env` (to create client)
 
 ```bash
 export VLESS_ID=$(cat /proc/sys/kernel/random/uuid)
@@ -32,7 +32,7 @@ SHADOWSOCKS_METHOD=aes-128-gcm SHADOWSOCKS_PASSWORD= ./create.sh -m server -p sh
 SHADOWSOCKS_METHOD=aes-256-gcm SHADOWSOCKS_PASSWORD= ./create.sh -m server -p shadowsocks -s kcp
 
 # use option file
-./create.sh -f .vless-xhttp.options
+./create.sh -f .vless-xhttp.env
 ```
 
 ## Run Server
@@ -48,7 +48,7 @@ In the directory, e.g. `vless-xhttp-server`, run
 The following command will create a directory e.g. `vless-xhttp-client`
 
 ```sh
-./create.sh -m client -f .vless-xhttp.options
+./create.sh -m client -f .vless-xhttp.env
 ```
 
 ## Run Client
@@ -61,11 +61,11 @@ In the directory, e.g. `vless-xhttp-client`, run
 
 ## All in One
 
-- Run `./create-all-in-one-server.sh` to create the server with the existing `.options` file
+- Run `./create-all-in-one-server.sh` to create the server with the existing `.env` file
 - Run the following to create the new server
 
 ```sh
-rm -fr .*.options *-server *-client
+rm -fr .*.env *-server *-client
 
 export KCP_SEED=${KCP_SEED:-"$(tr -cd '[:alnum:]' </dev/urandom | fold -w10 | head -n1)"}
 export PREFIX=${PREFIX:-$(hostname)}

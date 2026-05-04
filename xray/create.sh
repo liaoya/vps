@@ -28,7 +28,7 @@ Example:
 # Create the client
     $(basename "${BASH_SOURCE[0]}") -m client -f <option file>
 # Use the current options to create environment
-    $(basename "${BASH_SOURCE[0]}") -f .options
+    $(basename "${BASH_SOURCE[0]}") -f .env
 EOF
 }
 
@@ -78,7 +78,11 @@ while getopts ":hvcd:f:m:p:s:" opt; do
 done
 
 if [[ -z ${EVNFILE} ]]; then
-    EVNFILE=${ROOT_DIR}/.$(hostname)-${PROTOCOL}-${STREAM}.options
+    if [[ -f ${ROOT_DIR}/${PROTOCOL}-${STREAM}.env ]]; then
+        EVNFILE=${ROOT_DIR}/${PROTOCOL}-${STREAM}.env
+    else
+        EVNFILE=${ROOT_DIR}/.$(hostname)-${PROTOCOL}-${STREAM}.env
+    fi
 fi
 if [[ ${MODE} == client && ! -e ${EVNFILE} ]]; then
     echo "${EVNFILE} must exist for ${MODE}"
@@ -137,7 +141,7 @@ fi
 if [[ -f "${ROOT_DIR}/pre.sh" ]]; then source "${ROOT_DIR}/pre.sh"; fi
 
 if [[ -f "${ROOT_DIR}/${XRAY[MODE]}/env.sh" ]]; then source "${ROOT_DIR}/${XRAY[MODE]}/env.sh"; fi
-cp "${EVNFILE}" "${RUNTIME}"/.options
+cp "${EVNFILE}" "${RUNTIME}"/.env
 cp "${ROOT_DIR}/run.sh" "${RUNTIME}"/
 
 if [[ -f "${ROOT_DIR}/post.sh" ]]; then source "${ROOT_DIR}/post.sh"; fi
