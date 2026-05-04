@@ -11,22 +11,79 @@ sed -i 's|^/swapfile|# /swapfile|' /etc/fstab
 sed -i 's|^/swap.img|# /swap.img|' /etc/fstab
 rm -f /swapfile /swap.img
 
+sed -i -e "/^GatewayPorts/d" -e "/^PermitRootLogin/d" -e "/^UseDNS/d" /etc/ssh/sshd_config
+touch /etc/ssh/sshd_config.d/custom.conf
+sed -i -e "/^GatewayPorts/d" -e "/^PermitRootLogin/d" -e "/^UseDNS/d" /etc/ssh/sshd_config.d/custom.conf
+cat <<EOF | tee -a /etc/ssh/sshd_config.d/custom.conf
+GatewayPorts yes
+PermitRootLogin yes
+UseDNS no
+EOF
+systemctl restart ssh
+
+curl https://zyedidia.github.io/eget.sh | sh
+mv ./eget /usr/local/bin
+chown 0:0 /usr/local/bin/eget
+eget --upgrade-only --to=/usr/local/bin --asset="jq-linux-amd64" jqlang/jq
+eget --upgrade-only --to=/usr/local/bin --asset="^.tar.gz" mikefarah/yq
+eget --upgrade-only --to=/usr/local/bin --asset="^musl" starship/starship
+
+# create normal user
+SUDO_USER=tshen
+useradd -g users -s /bin/bash -m "$SUDO_USER"
+echo "$(id -un $SUDO_USER) ALL=(ALL) NOPASSWD: ALL" | tee "/etc/sudoers.d/$(id -un $SUDO_USER)"
+SUDO_USER_DIR=$(getent passwd "$SUDO_USER" | cut -d: -f6)
+mkdir "$SUDO_USER_DIR/.ssh"
+touch "$SUDO_USER_DIR/.ssh/authorized_keys"
+chown -R "$(id -u $SUDO_USER):$(id -g $SUDO_USER)" "$SUDO_USER_DIR/.ssh"
+chmod 700 "$SUDO_USER_DIR/.ssh"
+chmod 644 "$SUDO_USER_DIR/.ssh/authorized_keys"
+getent group docker && usermod -aG docker "${SUDO_USER}"
+```
+
+```bash
+cat <<EOF | tee /etc/profile.d/starship.sh
+#!/bin/bash
+
+if [[ $TERM != linux && $TERM != vt220 ]] && command -v starship 1>/dev/null 2>&1; then
+    eval "$(starship init bash)"
+fi
+EOF
+
+mkdir -p /etc/fish/conf.d
+
+cat <<EOF | tee /etc/fish/conf.d/starship.fish
+#!/bin/env fish
+
+if command -sq starship
+    starship init fish | source
+end
+EOF
+
+cat <<EOF | tee /etc/starship.toml
+command_timeout=1000
+
+[localip]
+disabled=true
+
+[shell]
+disabled=false
+style="black bold"
+EOF
+
+echo '#!/bin/bash' | tee /usr/local/bin/starship_precmd
+chmod a+x /usr/local/bin/starship_precmd
+```
+
+Run the following with normal user
+
+```sh
 sed -i -e "/# set PATH so it includes user's private bin if it exists/,+4d" ~/.profile
 cat <<'EOF' | tee -a ~/.profile
 # set PATH so it includes user's private bin if it exists
 if [ -d "$HOME/bin" ] && ! test "${PATH#*$HOME/bin}" != "$PATH"; then
     PATH="$HOME/bin:$PATH"
 fi
-
-sudo sed -i -e "/^GatewayPorts/d" -e "/^PermitRootLogin/d" -e "/^UseDNS/d" /etc/ssh/sshd_config
-sudo touch /etc/ssh/sshd_config.d/custom.conf
-sudo sed -i -e "/^GatewayPorts/d" -e "/^PermitRootLogin/d" -e "/^UseDNS/d" /etc/ssh/sshd_config.d/custom.conf
-cat <<EOF | sudo tee -a /etc/ssh/sshd_config.d/custom.conf
-GatewayPorts yes
-PermitRootLogin yes
-UseDNS no
-EOF
-sudo systemctl restart ssh
 
 mkdir -p ~/.bashrc.d ~/.bash_completion.d ~/.local/bin ~/Downloads ~/Documents
 cat <<'EOF' | tee -a ~/.bashrc
@@ -54,9 +111,6 @@ EOF
     [[ -d "${HOME}/.local/bin" ]] || mkdir -p "${HOME}/.local/bin"
     source ~/.bashrc
 fi
-
-sudo bash -c 'curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR=/usr/local/bin sh'
-sudo chown 0:0 /usr/local/bin/uv*
 
 [[ -f /etc/apt/sources.list.save ]] || cp -pr /etc/apt/sources.list /etc/apt/sources.list.save
 MIRROR_URL=http://mirrors.ubuntu.com/JP.txt
@@ -119,31 +173,10 @@ apt-get install -qy --no-install-recommends "linux-generic-hwe-${UBUNTU_VERSION}
 apt-get install -qq -y certbot curl docker.io docker-compose-v2 dos2unix fish git gnupg moreutils nmon nano powerline sshpass tig tmux ufw vim
 apt-get install -qq -y python3-distutils
 
-curl https://zyedidia.github.io/eget.sh | sh
-mv ./eget /usr/local/bin
-chown 0:0 /usr/local/bin/eget
-eget --upgrade-only --to=/usr/local/bin --asset="jq-linux-amd64" jqlang/jq
-eget --upgrade-only --to=/usr/local/bin --asset="^.tar.gz" mikefarah/yq
-eget --upgrade-only --to=/usr/local/bin --asset="^musl" starship/starship
-eget --upgrade-only --to=/usr/local/bin zellij-org/zellij
-
 mkdir ~/.ssh
 chmod 700 ~/.ssh
 touch ~/.ssh/authorized_keys
 chmod 644 ~/.ssh/authorized_keys
-
-# create normal user
-SUDO_USER=tshen
-useradd -g users -s /bin/bash -m "$SUDO_USER"
-echo "$(id -un $SUDO_USER) ALL=(ALL) NOPASSWD: ALL" | tee "/etc/sudoers.d/$(id -un $SUDO_USER)"
-SUDO_USER_DIR=$(getent passwd "$SUDO_USER" | cut -d: -f6)
-mkdir "$SUDO_USER_DIR/.ssh"
-touch "$SUDO_USER_DIR/.ssh/authorized_keys"
-chown -R "$(id -u $SUDO_USER):$(id -g $SUDO_USER)" "$SUDO_USER_DIR/.ssh"
-chmod 700 "$SUDO_USER_DIR/.ssh"
-chmod 644 "$SUDO_USER_DIR/.ssh/authorized_keys"
-getent group docker && usermod -aG docker "${SUDO_USER}"
-
 
 # https://unix.stackexchange.com/questions/130786/can-i-remove-files-in-var-log-journal-and-var-cache-abrt-di-usr
 echo "SystemMaxUse=100M" | sudo tee -a /etc/systemd/journald.conf
@@ -159,40 +192,6 @@ sudo ufw status
 # Make sure ssh is allowed
 sudo ufw enable
 sudo ufw status
-```
-
-```bash
-cat <<EOF | tee /etc/profile.d/starship.sh
-#!/bin/bash
-
-if [[ $TERM != linux && $TERM != vt220 ]] && command -v starship 1>/dev/null 2>&1; then
-    eval "$(starship init bash)"
-fi
-EOF
-
-mkdir -p /etc/fish/conf.d
-
-cat <<EOF | tee /etc/fish/conf.d/starship.fish
-#!/bin/env fish
-
-if command -sq starship
-    starship init fish | source
-end
-EOF
-
-cat <<EOF | tee /etc/starship.toml
-command_timeout=1000
-
-[localip]
-disabled=true
-
-[shell]
-disabled=false
-style="black bold"
-EOF
-
-echo '#!/bin/bash' | tee /usr/local/bin/starship_precmd
-chmod a+x /usr/local/bin/starship_precmd
 ```
 
 ## Enable BBR in 18.04
