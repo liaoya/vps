@@ -3,8 +3,10 @@
 
 set -e
 
-set -x
-export PS4='+(${BASH_SOURCE[0]}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+if [[ ${1} == "-v" ]]; then
+    set -x
+    export PS4='+(${BASH_SOURCE[0]}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+fi
 
 THIS_DIR=$(readlink -f "${BASH_SOURCE[0]}")
 THIS_DIR=$(dirname "${THIS_DIR}")
