@@ -80,3 +80,9 @@ export VLESS_ID=${VLESS_ID:-$(cat /proc/sys/kernel/random/uuid)}
 
 - <https://github.com/XTLS/Xray-examples>
 - <https://github.com/chika0801/Xray-examples>
+
+- <https://www.chonglangbiji.com/security/xray-allowinsecure-deprecation/>
+- [Xray-core新特性使用教程（固定服务器证书、更改XHTTP填充查询参数名称、路由规则缓存）](https://echonet.icu/t/topic/189)
+- <https://github.com/2dust/v2rayN/discussions/9460>
+
+`xray tls hash --cert xray.crt` or `openssl x509 -in xray.crt -noout -fingerprint -sha256 | awk -F= '{print $2}' | tr -d ':' | tr 'A-Z' 'a-z'`

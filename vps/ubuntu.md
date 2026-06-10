@@ -4,7 +4,7 @@
 hostnamectl set-hostname <>
 timedatectl set-timezone UTC
 # Make sudo work without warning
-echo $(hostname -I) $(hostname)  | tee -a /etc/hosts
+echo $(hostname -I) $(hostname) | tee -a /etc/hosts
 
 swapoff -a
 sed -i 's|^/swapfile|# /swapfile|' /etc/fstab
@@ -42,7 +42,7 @@ getent group docker && usermod -aG docker "${SUDO_USER}"
 ```
 
 ```bash
-cat <<EOF | tee /etc/profile.d/starship.sh
+cat <<'EOF' | tee /etc/profile.d/starship.sh
 #!/bin/bash
 
 if [[ $TERM != linux && $TERM != vt220 ]] && command -v starship 1>/dev/null 2>&1; then
@@ -130,32 +130,11 @@ apt install -qq -y bc
 VERSION=$(echo "$(lsb_release -r | cut -d':' -f2 | tr -d '[:space:]') * 100 / 1" | bc)
 
 declare -a ppa_repos
-ppa_repos+=(ppa:ansible/ansible ppa:fish-shell/release-3)
+ppa_repos+=(ppa:ansible/ansible)
 ppa_repos+=(ppa:deadsnakes/ppa ppa:pypy/ppa) # ppa:deadsnakes/ppa for various python
-ppa_repos+=(ppa:maveonair/helix-editor)
-ppa_repos+=(ppa:neovim-ppa/unstable) # ppa:neovim-ppa/stable is very old
-if [[ ${VERSION} -eq 1804 ]]; then
-    # ppa:deadsnakes/ppa for various python
-    # ppa:git-core/ppa, now ppa:savoury1/backports has latest git
-    ppa_repos+=(ppa:savoury1/backports)
-    ppa_repos+=(ppa:apt-fast/stable ppa:codeblocks-devs/release ppa:deadsnakes/ppa ppa:kelleyk/emacs ppa:fish-shell/release-3
-        ppa:lazygit-team/release
-        ppa:kimura-o/ppa-tig ppa:pypy/ppa ppa:unilogicbv/shellcheck
-        ppa:jonathonf/vim)
-elif [[ ${VERSION} -eq 2004 ]]; then
-    # ppa:deadsnakes/ppa for various python
-    # ppa:git-core/ppa, now ppa:savoury1/backports has latest git
-    # ppa:mtvoid/ppa for emacs27
-    # ppa:mjuhasz/backports for tmux 3.1b
-    ppa_repos+=(ppa:savoury1/backports)
-    ppa_repos+=(ppa:ansible/ansible ppa:fish-shell/release-4 ppa:jonathonf/vim ppa:kelebek333/xfce-4.16 ppa:mjuhasz/backports)
-elif [[ ${VERSION} -eq 2204 ]]; then
-    ppa_repos+=(ppa:savoury1/backports)
-    ppa_repos+=(ppa:fish-shell/release-4 ppa:jonathonf/vim)
-elif [[ ${VERSION} -eq 2404 ]]; then
-    ppa_repos+=(ppa:savoury1/backports)
-    ppa_repos+=(ppa:fish-shell/release-4 ppa:jonathonf/vim)
-fi
+ppa_repos+=(ppa:fish-shell/release-4)
+ppa_repos+=(ppa:jonathonf/vim)
+ppa_repos+=(ppa:savoury1/backports)
 for ppa in "${ppa_repos[@]}"; do add-apt-repository -y "$ppa"; done
 
 if [[ ! -f /etc/needrestart/needrestart.conf ]]; then
@@ -171,7 +150,6 @@ UBUNTU_VERSION=$(lsb_release -r | cut -d':' -f2 | tr -d '[:space:]')
 apt-get install -qy --no-install-recommends "linux-generic-hwe-${UBUNTU_VERSION}"
 
 apt-get install -qq -y certbot curl docker.io docker-compose-v2 dos2unix fish git gnupg moreutils nmon nano powerline sshpass tig tmux ufw vim
-apt-get install -qq -y python3-distutils
 
 mkdir ~/.ssh
 chmod 700 ~/.ssh
@@ -239,7 +217,7 @@ echo "net.ipv4.tcp_fastopen = 3" > "${SYSCTL_FILE}"
 
 ```bash
 # https://shadowsocks.org/guide/advanced.html
-cat <<EOF | tee /etc/sysctl.d/90-shadowsocks.conf
+cat <<EOF | sudo tee /etc/sysctl.d/90-shadowsocks.conf
 fs.file-max = 51200
 
 net.core.rmem_max = 67108864
@@ -300,7 +278,7 @@ pathmunge () {
             fi
     esac
 }
-#[[ -d "${HOME}/.local/bin" ]] &&  pathmunge "${HOME}/.local/bin"
+#[ -d "${HOME}/.local/bin" ] &&  pathmunge "${HOME}/.local/bin"
 pathmunge /sbin
 EOF
     [[ -d "${HOME}/.local/bin" ]] || mkdir -p "${HOME}/.local/bin"
@@ -317,7 +295,7 @@ EOF
 
 tmuxfile=$(find /usr/share -iname powerline.conf 2>/dev/null | grep tmux/powerline.conf)
 if [[ -n $tmuxfile ]]; then
-    echo "source ${tmuxfile}" >> "${HOME}/.tmux.conf"
+    echo "source ${tmuxfile}" | sudo tee -a /etc/tmux.conf
 fi
 ```
 
